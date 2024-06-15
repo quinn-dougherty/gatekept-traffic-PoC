@@ -1,0 +1,47 @@
+[project]
+name = "gatekeep"
+version = "0.1.0"
+description = "Disagree about what is or isn't a gatekeeper"
+authors = [
+    { name = "Quinn Dougherty", email = "quinnd@riseup.net" }
+]
+dependencies = [
+    "numpy>=1.26.4",
+    "scipy>=1.13.1",
+    "torch>=2.3.1",
+    "matplotlib>=3.9.0",
+    "opencv-python>=4.10.0.82",
+    "opencv-contrib-python>=4.10.0.82",
+    "tqdm>=4.66.4",
+    "coconut>=3.1.1",
+    "gymnasium>=0.29.1",
+    "dask>=2024.6.0",
+    "distributed>=2024.6.0",
+    "jaxtyping>=0.2.30",
+    "einops>=0.8.0",
+]
+readme = "README.md"
+requires-python = ">= 3.11"
+
+[project.scripts]
+"gatekeep" = "gatekeep:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "black>=24.4.2",
+    "hypothesis>=6.103.2",
+    "pytest>=8.2.2",
+    "crosshair-tool>=0.0.54",
+    "hypothesis-crosshair>=0.0.4"
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gatekeep"]
