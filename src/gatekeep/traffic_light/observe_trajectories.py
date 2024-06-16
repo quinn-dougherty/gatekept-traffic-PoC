@@ -1,11 +1,12 @@
 import numpy as np
 from tqdm import tqdm
+from gatekeep.abcs import SimulationBase
 from gatekeep.traffic_light.types import SimState
 from gatekeep.logic.linear_temporal import Proposition
 from gatekeep.logic.evaluate import evaluate
 
 
-def observe(sim, epsilon=1e-5) -> Proposition:
+def observe(sim: SimulationBase, epsilon: float = 1e-5) -> Proposition:
     if len(sim.vehicles()) == 0:
         return Proposition(SimState.NO_TRAFFIC)
 
@@ -21,12 +22,13 @@ def observe(sim, epsilon=1e-5) -> Proposition:
     return Proposition(SimState.TRAFFIC_FLOW)
 
 
-def simulate_trajectories(sim, action, num_trajectories, num_steps):
+def simulate_trajectories(
+    sim, action, num_trajectories: int, len_trajectory: int
+) -> list[list[Proposition]]:
     trajectories = []
-    for _ in tqdm(range(num_trajectories)):
-        # sim_copy = sim.copy()
+    for _ in range(num_trajectories):
         trajectory = [observe(sim)]
-        for _ in range(num_steps):
+        for _ in tqdm(range(len_trajectory)):
             _, _, done, _ = sim.step(action)
             trajectory.append(observe(sim))
             if done:

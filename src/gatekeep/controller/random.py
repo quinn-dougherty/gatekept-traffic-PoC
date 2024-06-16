@@ -1,4 +1,7 @@
-class RandomController:
+from gatekeep.abcs import ControllerBase
+
+
+class RandomController(ControllerBase):
     def __init__(self, env):
         """
         Random action selector

@@ -155,6 +155,8 @@ prompt-toolkit==3.0.47
 psutil==5.9.8
     # via coconut
     # via distributed
+pyee==11.1.0
+    # via python-ffmpeg
 pygls==1.3.1
     # via crosshair-tool
 pygments==2.18.0
@@ -164,6 +166,8 @@ pyparsing==3.1.2
 pytest==8.2.2
 python-dateutil==2.9.0.post0
     # via matplotlib
+python-ffmpeg==2.0.12
+    # via gatekeep
 pyyaml==6.0.1
     # via dask
     # via distributed
@@ -200,6 +204,8 @@ typing-extensions==4.12.2
     # via coconut
     # via crosshair-tool
     # via gymnasium
+    # via pyee
+    # via python-ffmpeg
     # via torch
     # via typeshed-client
     # via typing-inspect

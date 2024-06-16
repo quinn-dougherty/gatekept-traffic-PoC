@@ -1,5 +1,4 @@
 .direnv/
-videos/*
 # python generated files
 __pycache__/
 *.py[oc]
@@ -10,3 +9,4 @@ wheels/
 
 # venv
 .venv
+*.mp4

@@ -40,7 +40,8 @@ class Vehicle:
         pass
 
     def advance_by_multiplier(self, multiplier) -> None:
-        self.position += self.velocity * multiplier
+        self.velocity *= multiplier
+        self.advance()
         pass
 
     def stop(self) -> None:
@@ -48,7 +49,7 @@ class Vehicle:
         pass
 
     def is_collided(self, other: Self) -> bool:
-        return bool(np.linalg.norm(self.position - other.position) < 1e-1)
+        return bool(np.linalg.norm(self.position - other.position) > 1 - 2e-2)
 
     def copy(self) -> "Vehicle":
         return Vehicle(self.position.copy(), self.velocity.copy())

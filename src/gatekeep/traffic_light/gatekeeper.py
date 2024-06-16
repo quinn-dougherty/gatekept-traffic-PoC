@@ -1,28 +1,31 @@
-import dask.bag as db
+from dask import bag as db
 from dask.distributed import Client
 from dask.diagnostics import ProgressBar
+from gatekeep.abcs import GatekeeperBase, SimulationBase, ControllerBase
+from gatekeep.logic.linear_temporal import Proposition
 from gatekeep.traffic_light.observe_trajectories import (
     simulate_trajectories,
     compile_spec,
 )
 
 
-class Gatekeeper:
+class Gatekeeper(GatekeeperBase):
     def __init__(
         self,
-        sim,
-        spec,
-        controller,
-        num_trajectories=int(1e1),
-        num_steps=int(1e1),
-        epsilon=1e-6,
+        sim: SimulationBase,
+        spec: Proposition,
+        controller: ControllerBase,
+        num_trajectories: int = int(1e1),
+        num_steps_per_trajectory: int = int(1e1),
+        epsilon: float = 1e-6,
     ):
         self.sim = sim
         self.spec = spec
         self.controller = controller
         self.num_trajectories = num_trajectories
-        self.num_steps = num_steps
+        self.num_steps_per_trajectory = num_steps_per_trajectory
         self.epsilon = epsilon
+        self.trajectories = []
 
     def run_step(self):
         generate_proof_cert = compile_spec(self.spec, self.sim)
@@ -31,15 +34,15 @@ class Gatekeeper:
             self.sim,
             action,
             num_trajectories=self.num_trajectories,
-            num_steps=self.num_steps,
+            len_trajectory=self.num_steps_per_trajectory,
         )
+        self.trajectories.extend(trajectories)
         proof_cert = generate_proof_cert(action)
         proof_cert["action"] = action
         next_state, reward, done, _ = self.sim.step(action)
         return next_state, reward, done, proof_cert, trajectories
 
     def loop(self):
-
         def run_simulation(num_iterations):
             proof_certs = []
             all_trajectories = []

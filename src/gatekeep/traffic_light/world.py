@@ -4,7 +4,7 @@ import gymnasium as gym
 
 
 class TrafficLightWorld(gym.Env):
-    def __init__(self, max_steps: int, video_path: Optional[str] = None):
+    def __init__(self, max_steps: int):
         super(TrafficLightWorld, self).__init__()
         self.observation_space = gym.spaces.Dict(
             {"traffic_lights": gym.spaces.MultiBinary(4)}
@@ -15,7 +15,6 @@ class TrafficLightWorld(gym.Env):
         self.state = np.zeros(4)
         self.steps = 0
         self.max_steps = max_steps
-        self.video_path = video_path
         self.reset()
 
     def reset(self):
@@ -33,10 +32,8 @@ class TrafficLightWorld(gym.Env):
 
         return self.state, 0, done, {}
 
-    def copy(self) -> Self:
-        world_copy = TrafficLightWorld(
-            max_steps=self.max_steps, video_path=self.video_path
-        )
+    def copy(self) -> "TrafficLightWorld":
+        world_copy = TrafficLightWorld(max_steps=self.max_steps)
         world_copy.state = self.state.copy()
         world_copy.steps = self.steps
         world_copy.frames = self.frames.copy()

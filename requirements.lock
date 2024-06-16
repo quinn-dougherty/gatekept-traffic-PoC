@@ -121,12 +121,16 @@ prompt-toolkit==3.0.47
 psutil==5.9.8
     # via coconut
     # via distributed
+pyee==11.1.0
+    # via python-ffmpeg
 pygments==2.18.0
     # via coconut
 pyparsing==3.1.2
     # via matplotlib
 python-dateutil==2.9.0.post0
     # via matplotlib
+python-ffmpeg==2.0.12
+    # via gatekeep
 pyyaml==6.0.1
     # via dask
     # via distributed
@@ -159,6 +163,8 @@ typeguard==2.13.3
 typing-extensions==4.12.2
     # via coconut
     # via gymnasium
+    # via pyee
+    # via python-ffmpeg
     # via torch
 urllib3==2.2.1
     # via distributed
