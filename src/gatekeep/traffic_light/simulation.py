@@ -20,7 +20,7 @@ class TrafficLightSim(SimulationBase):
     CRASH_PENALTY = -1e100
     FLOW_REWARD = 1e0
     DELTA = 7.5e-2
-    ACCEL = 1 + 2 * 7.5e-2
+    ACCEL = 1 + 7.5e-2
 
     def __init__(
         self,
@@ -51,13 +51,13 @@ class TrafficLightSim(SimulationBase):
         self.frames = []
 
         self.light_positions = [
-            (0.5 - self.DELTA, 0.25),  # South light
-            (0.75, 0.5 + self.DELTA),  # East light
             (0.5 + self.DELTA, 0.75),  # North light
+            (0.75, 0.5 + self.DELTA),  # East light
+            (0.5 - self.DELTA, 0.25),  # South light
             (0.25, 0.5 - self.DELTA),  # West light
         ]
 
-    def step(self, action):
+    def step(self, action: np.ndarray):
         """
         Args:
           action: bitvector of length 4
@@ -78,7 +78,7 @@ class TrafficLightSim(SimulationBase):
             reward += reward_step
             done = done or done_step
             # if i % 10 == 0:
-            # self.render()
+            self.render()
 
         return self.state, reward, done, {}
 
@@ -115,25 +115,27 @@ class TrafficLightSim(SimulationBase):
                 list[bool]: a list representing if the vehicle is before the light, for each direction
             """
             return [
-                vehicle.position[0] < self.light_positions[0][0],  # South
-                vehicle.position[1] > self.light_positions[1][1],  # East
-                vehicle.position[0] > self.light_positions[2][0],  # North
-                vehicle.position[1] < self.light_positions[3][1],  # West
+                vehicle.position[1] > self.light_positions[0][1],  # North
+                vehicle.position[0] > self.light_positions[1][0],  # East
+                vehicle.position[1] < self.light_positions[2][1],  # South
+                vehicle.position[0] < self.light_positions[3][0],  # West
             ]
 
         # Advance and process preexisting vehicles
         for direction in range(4):
+            light = self.state["traffic_lights"][direction]
             vehicles_list = self.trafficlight_vehicles_map[direction]
             for vehicle in vehicles_list:
                 self.trafficlight_vehicles_map[direction].remove(vehicle)
-                if self.state["traffic_lights"][direction] > 0:
+                if light == 0 and not is_vehicle_before_light(vehicle)[direction]:
+                    # Continue moving if red light and vehicle has passed the light
+                    vehicle.advance()
+                elif light == 1:
                     # Accelerate if green
                     vehicle.advance_by_multiplier(self.ACCEL)
-                elif is_vehicle_before_light(vehicle)[direction]:
+                else:
                     # Stop if red and vehicle before the light
                     vehicle.stop()
-                else:
-                    vehicle.advance()
                 self.trafficlight_vehicles_map[direction].append(vehicle)
                 offscreen = np.any(vehicle.position < 0) or np.any(vehicle.position > 1)
                 # print(f"OFFSCREEN: {offscreen} &&& Vehicle: {vehicle}")
@@ -157,7 +159,7 @@ class TrafficLightSim(SimulationBase):
         _ = self.update_vehicle_state()
         done = self.current_step >= self.vehicle_steps_per_action
         # print("BAR", self.trafficlight_vehicles_map)
-        self.render()
+        # self.render()
         return reward, done
 
     def render(self) -> None:
@@ -174,7 +176,9 @@ class TrafficLightSim(SimulationBase):
         ax.plot([0, 1], [0.5 + self.DELTA, 0.5 + self.DELTA], color="gray", linewidth=4)
 
         # Draw traffic lights
-        colors = ["green" if state else "red" for state in self.state["traffic_lights"]]
+        colors = [
+            "green" if light > 0 else "red" for light in self.state["traffic_lights"]
+        ]
 
         for color, position in zip(colors, self.light_positions):
             ax.add_patch(Circle(position, 0.03, color=color))
