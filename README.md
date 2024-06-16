@@ -38,5 +38,6 @@ To my knowledge, there’s no empirical codebase people can disagree about being
 - Write up and post to spark debates
 - Scale to more and bigger problems
 - Laboratory in minetest or azerothcore. We should be able to simulate most of the theory of change in an open world video game.  
+- Compare/contrast reward function design with spec design, to see if assurances are more interpretable in this regime. 
 
 Of these, I’m most excited about data structures for proof certs and the potential to plug in an off the shelf model checker, and secondly shipping gatekeeping as a library. Unfortunately, I’m skeptical that the laboratory in minecraft is achievable by myself working alone, I may not be able to do it without another dev. 

@@ -48,6 +48,7 @@ class TrafficLightSim(SimulationBase):
         self.current_step = 0
         self.reset()
         self.state = self.world.state.copy()
+        self.crash_events = []
         self.frames = []
 
         self.light_positions = [
@@ -88,6 +89,7 @@ class TrafficLightSim(SimulationBase):
         self.state["vehicle_positions"] = np.zeros((self.max_vehicles, 2))
         self.state["vehicle_velocities"] = np.zeros((self.max_vehicles, 2))
         self.trafficlight_vehicles_map = [[]] * 4
+        self.crash_events = []
         return self.state
 
     def simulate(self) -> tuple[float, bool]:
@@ -104,7 +106,6 @@ class TrafficLightSim(SimulationBase):
             new_vehicle = Vehicle.from_direction(direction, self.DELTA)
             if new_vehicle not in self.trafficlight_vehicles_map[direction]:
                 self.trafficlight_vehicles_map[direction].append(new_vehicle)
-            # print("FOO", self.trafficlight_vehicles_map)
         reward = 0
 
         def is_vehicle_before_light(vehicle: Vehicle) -> list[bool]:
@@ -136,16 +137,19 @@ class TrafficLightSim(SimulationBase):
                 else:
                     # Stop if red and vehicle before the light
                     vehicle.stop()
-                self.trafficlight_vehicles_map[direction].append(vehicle)
+                # self.trafficlight_vehicles_map[direction].append(vehicle)
                 offscreen = np.any(vehicle.position < 0) or np.any(vehicle.position > 1)
                 # print(f"OFFSCREEN: {offscreen} &&& Vehicle: {vehicle}")
                 if offscreen:
                     reward += self.FLOW_REWARD
-                    self.trafficlight_vehicles_map[direction].remove(vehicle)
+                    # self.trafficlight_vehicles_map[direction].remove(vehicle)
+                else: 
+                    self.trafficlight_vehicles_map[direction].append(vehicle)
                 perp_i = (direction - 1) % 4
                 for other_vehicle in self.trafficlight_vehicles_map[perp_i]:
                     if vehicle.is_collided(other_vehicle):
                         reward += self.CRASH_PENALTY
+                        self.crash_events.append(vehicle.position)
                         if vehicle in self.trafficlight_vehicles_map[direction]:
                             self.trafficlight_vehicles_map[direction].remove(vehicle)
                         if other_vehicle in self.trafficlight_vehicles_map[perp_i]:
@@ -154,16 +158,15 @@ class TrafficLightSim(SimulationBase):
                 for other_vehicle in self.trafficlight_vehicles_map[perp_j]:
                     if vehicle.is_collided(other_vehicle):
                         reward += self.CRASH_PENALTY
+                        self.crash_events.append(vehicle.position)
                         self.trafficlight_vehicles_map[direction].remove(vehicle)
                         self.trafficlight_vehicles_map[perp_j].remove(other_vehicle)
         _ = self.update_vehicle_state()
         done = self.current_step >= self.vehicle_steps_per_action
-        # print("BAR", self.trafficlight_vehicles_map)
-        # self.render()
         return reward, done
 
     def render(self) -> None:
-        dpi = 2**5
+        dpi = 24
         fig, ax = plt.subplots(figsize=(6, 6), dpi=dpi)
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
@@ -186,8 +189,14 @@ class TrafficLightSim(SimulationBase):
         # Draw vehicles
         for vehicle in self.vehicles():
             x, y = vehicle.position
-            # print("debug:", x, y, end="\t")
             ax.add_patch(Rectangle((x - 0.02, y - 0.02), 0.04, 0.04, color="blue"))
+
+        # Draw explosions for crashes
+        for crash_position in self.crash_events:
+            ax.add_patch(Circle(crash_position, 0.05, color="orange"))
+
+        # Clear crash events after rendering
+        self.crash_events = []
 
         plt.tight_layout()
 
@@ -208,6 +217,7 @@ class TrafficLightSim(SimulationBase):
     def close(self):
         if self.video_path is not None:
             frames = np.stack(self.frames)
+
             plt.close()
             print(f"Saving video to {self.video_path}")
             self.save_video(frames, str(self.video_path), fps=2**2)
