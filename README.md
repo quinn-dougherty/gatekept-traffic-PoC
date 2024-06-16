@@ -9,12 +9,12 @@ proof of concept.
 Ephemerally,
 
 ``` sh
-nix develop .#bootstrap
+nix develop 
 CC=$(which gcc) GCC=$(which g++) rye sync
 rye run gatekeep
 ```
 
-Or install [`rye`](https://rye.astral.sh) yourself
+Or install [`rye`](https://rye.astral.sh) and [`sumo`](https://sumo.dlr.de/docs/Installing/index.html) yourself
 
 ```
 rye sync

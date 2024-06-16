@@ -9,12 +9,12 @@
         buildInputs = (import ./python.nix { inherit pkgs; })
           ++ (with pkgs; [ pkg-config libstdcxx5 zlib ]);
       };
-      bootstrap = pkgs.mkShell {
+      default = pkgs.mkShell {
         name = "gatekeep-bootstrap";
         shellHook = ''
           echo "${greeting}"
         '';
-        buildInputs = with pkgs; [ rye libclang libgcc ffmpeg-full ];
+        buildInputs = with pkgs; [ rye libclang libgcc ffmpeg-full sumo ];
       };
     };
   };
