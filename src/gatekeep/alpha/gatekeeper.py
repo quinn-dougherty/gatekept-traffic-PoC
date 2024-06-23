@@ -3,7 +3,7 @@ from dask.distributed import Client
 from dask.diagnostics import ProgressBar
 from gatekeep.abcs import GatekeeperBase, SimulationBase, ControllerBase
 from gatekeep.logic.linear_temporal import Proposition
-from gatekeep.traffic_light.observe_trajectories import (
+from gatekeep.alpha.observe_trajectories import (
     simulate_trajectories,
     compile_spec,
 )

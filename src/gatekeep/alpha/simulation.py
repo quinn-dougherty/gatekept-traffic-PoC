@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Circle
 import matplotlib.animation as animation
-from gatekeep.traffic_light.types import Vehicle
+from gatekeep.alpha.types import Vehicle
 from gatekeep.abcs import SimulationBase
 
 
@@ -143,7 +143,7 @@ class TrafficLightSim(SimulationBase):
                 if offscreen:
                     reward += self.FLOW_REWARD
                     # self.trafficlight_vehicles_map[direction].remove(vehicle)
-                else: 
+                else:
                     self.trafficlight_vehicles_map[direction].append(vehicle)
                 perp_i = (direction - 1) % 4
                 for other_vehicle in self.trafficlight_vehicles_map[perp_i]:

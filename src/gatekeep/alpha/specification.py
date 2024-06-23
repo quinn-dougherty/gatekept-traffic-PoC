@@ -1,5 +1,5 @@
 from gatekeep.logic.linear_temporal import Proposition, Not, And, Or, Always
-from gatekeep.traffic_light.types import WorldState, SimState
+from gatekeep.alpha.types import WorldState, SimState
 
 # Propositions
 n_green = Proposition(WorldState.N)  # North direction is green

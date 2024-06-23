@@ -1,8 +1,11 @@
 """Gatekeep, empirically"""
-
-import gatekeep
-from gatekeep.traffic_light import gatekeeper, simulation, world, specification
+from pathlib import Path
+import numpy as np
+import gymnasium as gym
+import sumo_rl # Needed for gym.make registry
+from gatekeep.alpha import gatekeeper, simulation, world, specification
 from gatekeep.controller.random import RandomController
+from gatekeep.traffic_light.world.utils import create_world
 
 
 def single_step_vid(spec):
@@ -33,8 +36,24 @@ def single_step_vid(spec):
     return reward, proof_cert
 
 
-def main() -> int:
-    """Main entry point of the program."""
+def alpha_main() -> int:
+    """Main entry point of the alpha program."""
     reward, proof_cert = single_step_vid(specification.safety)
     print(f"reward: {reward} ==== proofcert: {proof_cert}")
+    return 0
+
+
+def main() -> int:
+    world = create_world("single_intersection")
+    controller = RandomController(world)
+    # sim loop
+    next_obs, info = world.reset()
+    done = False
+    while not done:
+        next_obs, reward, terminated, truncated, info = world.step(
+            controller.select_action(next_obs)
+        )
+        done = terminated or truncated
+        print(next_obs, reward)
+
     return 0

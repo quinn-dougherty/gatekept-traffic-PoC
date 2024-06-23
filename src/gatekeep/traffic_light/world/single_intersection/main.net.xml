@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<net version="1.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+    <location netOffset="100.00,100.00" convBoundary="0.00,0.00,200.00,200.00" origBoundary="-100.00,-100.00,100.00,100.00" projParameter="!"/>
+
+    <edge id="E1" from="N1" to="N0" priority="1">
+        <lane id="E1_0" index="0" speed="13.89" length="100.00" shape="0.00,98.40 95.20,98.40"/>
+        <lane id="E1_1" index="1" speed="13.89" length="100.00" shape="95.20,98.40 200.00,98.40"/>
+    </edge>
+    <edge id="E2" from="N2" to="N0" priority="1">
+        <lane id="E2_0" index="0" speed="13.89" length="100.00" shape="101.60,200.00 101.60,104.80"/>
+        <lane id="E2_1" index="1" speed="13.89" length="100.00" shape="101.60,104.80 200.00,104.80"/>
+    </edge>
+    <edge id="E3" from="N3" to="N0" priority="1">
+        <lane id="E3_0" index="0" speed="13.89" length="100.00" shape="200.00,101.60 104.80,101.60"/>
+        <lane id="E3_1" index="1" speed="13.89" length="100.00" shape="104.80,101.60 0.00,101.60"/>
+    </edge>
+    <edge id="E4" from="N4" to="N0" priority="1">
+        <lane id="E4_0" index="0" speed="13.89" length="100.00" shape="98.40,0.00 98.40,95.20"/>
+        <lane id="E4_1" index="1" speed="13.89" length="100.00" shape="98.40,95.20 98.40,200.00"/>
+    </edge>
+
+    <junction id="N0" type="traffic_light" x="100.00" y="100.00" incLanes="E2_0 E3_0 E4_0 E1_0" intLanes="" shape="100.00,104.80 103.20,104.80 104.80,103.20 104.80,100.00 103.20,98.40 100.00,98.40 98.40,97.60 98.40,100.80">
+        <request index="0" response="0000" foes="1010"/>
+        <request index="1" response="0101" foes="0101"/>
+        <request index="2" response="0000" foes="1010"/>
+        <request index="3" response="0101" foes="0101"/>
+    </junction>
+    <junction id="N1" type="dead_end" x="0.00" y="100.00" incLanes="" intLanes="" shape="0.00,100.00 0.00,96.80"/>
+    <junction id="N2" type="dead_end" x="100.00" y="200.00" incLanes="" intLanes="" shape="103.20,200.00 100.00,200.00"/>
+    <junction id="N3" type="dead_end" x="200.00" y="100.00" incLanes="" intLanes="" shape="200.00,100.00 200.00,103.20"/>
+    <junction id="N4" type="dead_end" x="100.00" y="0.00" incLanes="" intLanes="" shape="96.80,0.00 100.00,0.00"/>
+
+    <tlLogic id="TL_N0" type="static" programID="0" offset="0">
+        <phase duration="31" state="GrGr"/>
+        <phase duration="4"  state="yryr"/>
+        <phase duration="31" state="rGrG"/>
+        <phase duration="4"  state="ryry"/>
+    </tlLogic>
+
+    <connection from="E1" to="E3" fromLane="0" toLane="0" tl="TL_N0" linkIndex="3" dir="s" state="o"/>
+    <connection from="E2" to="E4" fromLane="0" toLane="0" tl="TL_N0" linkIndex="0" dir="s" state="O"/>
+    <connection from="E3" to="E1" fromLane="0" toLane="0" tl="TL_N0" linkIndex="1" dir="s" state="o"/>
+    <connection from="E4" to="E2" fromLane="0" toLane="0" tl="TL_N0" linkIndex="2" dir="s" state="O"/>
+
+</net>

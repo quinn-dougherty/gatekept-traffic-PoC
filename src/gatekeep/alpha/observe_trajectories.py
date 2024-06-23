@@ -1,7 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 from gatekeep.abcs import SimulationBase
-from gatekeep.traffic_light.types import SimState
+from gatekeep.alpha.types import SimState
 from gatekeep.logic.linear_temporal import Proposition
 from gatekeep.logic.evaluate import evaluate
 

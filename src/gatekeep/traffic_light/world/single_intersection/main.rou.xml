@@ -1,0 +1,13 @@
+<routes>
+    <vType id="car" accel="2.6" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="50" guiShape="passenger"/>
+    
+    <route id="route1" edges="E1 E3"/>
+    <route id="route2" edges="E2 E4"/>
+    <route id="route3" edges="E3 E1"/>
+    <route id="route4" edges="E4 E2"/>
+    
+    <flow id="flow1" type="car" route="route1" begin="0" end="3600" vehsPerHour="300"/>
+    <flow id="flow2" type="car" route="route2" begin="0" end="3600" vehsPerHour="300"/>
+    <flow id="flow3" type="car" route="route3" begin="0" end="3600" vehsPerHour="300"/>
+    <flow id="flow4" type="car" route="route4" begin="0" end="3600" vehsPerHour="300"/>
+</routes>
