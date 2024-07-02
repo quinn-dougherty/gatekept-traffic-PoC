@@ -17,6 +17,10 @@ rye run gatekeep
 Or install [`rye`](https://rye.astral.sh) and [`sumo`](https://sumo.dlr.de/docs/Installing/index.html) yourself
 
 ```
+sudo add-apt-repository ppa:sumo/stable
+sudo apt-get update
+sudo apt-get install sumo sumo-tools sumo-doc
+
 rye sync
 rye run gatekeep
 ```

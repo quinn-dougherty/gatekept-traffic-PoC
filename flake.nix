@@ -8,11 +8,25 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  outputs = { self, nixpkgs, parts, fmt }@inputs:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      parts,
+      fmt,
+    }@inputs:
     parts.lib.mkFlake { inherit inputs; } {
-      systems =
-        [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
-      imports = [ ./nix/shells.nix fmt.flakeModule ./nix/format.nix ];
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
+      ];
+      imports = [
+        ./nix/shells.nix
+        fmt.flakeModule
+        ./nix/format.nix
+      ];
       flake.herculesCI.ciSystems = [ "x86_64-linux" ];
     };
 }

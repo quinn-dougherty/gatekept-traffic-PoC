@@ -1,8 +1,15 @@
 { pkgs }:
 let
-  py-deps = ps: with ps; [ ipython jupyter pytest black hypothesis ];
-  gatekeep-deps = ps:
-    with ps; [
+  py-deps =
+    ps: with ps; [
+      ipython
+      jupyter
+      pytest
+      black
+      hypothesis
+    ];
+  gatekeep-deps =
+    ps: with ps; [
       numpy
       scipy
       torch
@@ -15,8 +22,8 @@ let
       jaxtyping
       einops
     ];
-  jax = ps:
-    with ps; [
+  jax =
+    ps: with ps; [
       jax
       jaxlib
       jaxlibWithoutCuda
@@ -25,8 +32,16 @@ let
       jaxopt
       einops
     ];
-in [
-  (pkgs.python311.withPackages
-    (ps: builtins.concatLists (map (f: f ps) [ py-deps gatekeep-deps ])))
+in
+[
+  (pkgs.python311.withPackages (
+    ps:
+    builtins.concatLists (
+      map (f: f ps) [
+        py-deps
+        gatekeep-deps
+      ]
+    )
+  ))
   pkgs.sumo
 ]

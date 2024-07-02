@@ -1,8 +1,6 @@
 """Gatekeep, empirically"""
-from pathlib import Path
-import numpy as np
-import gymnasium as gym
-import sumo_rl # Needed for gym.make registry
+
+from time import sleep
 from gatekeep.alpha import gatekeeper, simulation, world, specification
 from gatekeep.controller.random import RandomController
 from gatekeep.traffic_light.world.utils import create_world
@@ -44,6 +42,7 @@ def alpha_main() -> int:
 
 
 def main() -> int:
+    """Main entry point of the program"""
     world = create_world("single_intersection")
     controller = RandomController(world)
     # sim loop
@@ -55,5 +54,6 @@ def main() -> int:
         )
         done = terminated or truncated
         print(next_obs, reward)
+        sleep(1e-3)
 
     return 0
