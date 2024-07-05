@@ -22,6 +22,7 @@ dependencies = [
     "python-ffmpeg>=2.0.12",
     "sumo-rl>=1.4.5",
     "libsumo>=1.20.0",
+    "mesa>=2.3.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.11"

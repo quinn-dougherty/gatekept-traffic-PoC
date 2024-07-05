@@ -1,9 +1,10 @@
 """Gatekeep, empirically"""
 
 from time import sleep
-from gatekeep.alpha import gatekeeper, simulation, world, specification
+from gatekeep.alpha import gatekeeper, simulation0 as simulation, world, specification
 from gatekeep.controller.random import RandomController
-from gatekeep.traffic_light.world.utils import create_world
+from gatekeep.beta.world.utils import create_world
+from gatekeep.gamma import mesa, TrafficModel, agent_portrayal
 
 
 def single_step_vid(spec):
@@ -41,7 +42,7 @@ def alpha_main() -> int:
     return 0
 
 
-def main() -> int:
+def beta_main() -> int:
     """Main entry point of the program"""
     world = create_world("single_intersection")
     controller = RandomController(world)
@@ -56,4 +57,23 @@ def main() -> int:
         print(next_obs, reward)
         sleep(1e-3)
 
+    return 0
+
+
+def main() -> int:
+    grid = mesa.visualization.CanvasGrid(agent_portrayal, 11, 11, 500, 500)
+    chart = mesa.visualization.ChartModule(
+        [{"Label": "Collisions", "Color": "Black"}], data_collector_name="datacollector"
+    )
+
+    model_params = {
+        "N": mesa.visualization.Slider("Number of cars", 20, 1, 50),
+    }
+
+    server = mesa.visualization.ModularServer(
+        TrafficModel, [grid, chart], "Traffic Model", model_params
+    )
+
+    server.port = 8521
+    server.launch()
     return 0
