@@ -21,7 +21,7 @@ let
       distributed
       jaxtyping
       einops
-      mesa
+      # mesa
     ];
   jax =
     ps: with ps; [
