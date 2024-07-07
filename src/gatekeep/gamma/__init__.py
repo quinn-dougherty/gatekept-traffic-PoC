@@ -12,11 +12,12 @@ class TrafficLight(mesa.Agent):
 
 
 class Car(mesa.Agent):
-    def __init__(self, unique_id, model, direction):
+    def __init__(self, unique_id, model, direction, debug=True):
         super().__init__(unique_id, model)
         self.direction = direction  # 'N', 'S', 'E', 'W'
         self.crashed = False
         self.passed_light = False
+        self.DEBUG = debug
 
     def move(self):
         if self.crashed:
@@ -32,7 +33,14 @@ class Car(mesa.Agent):
         elif self.direction == "W":
             new_pos = (x - 1, y)
 
+        if self.DEBUG:
+            print(
+                f"Car {self.unique_id} direction: {self.direction}, current pos: {self.pos}, new pos: {new_pos}"
+            )
+
         if self.model.grid.out_of_bounds(new_pos):
+            if self.DEBUG:
+                print(f"Car {self.unique_id} has left the grid, removing...")
             self.model.remove_car(self)
             return
 
@@ -40,14 +48,22 @@ class Car(mesa.Agent):
         if self.at_traffic_light():
             light = self.model.traffic_lights[self.direction]
             if light.state == "red":
+                if self.DEBUG:
+                    print(f"Car {self.unique_id} is at red light, stopping...")
                 return  # Stop at red light
 
         cell_contents = self.model.grid.get_cell_list_contents(new_pos)
         other_cars = [obj for obj in cell_contents if isinstance(obj, Car)]
 
         if not other_cars:
+            if self.DEBUG:
+                print(f"Car {self.unique_id} moving to {new_pos}")
             self.model.grid.move_agent(self, new_pos)
         else:
+            if self.DEBUG:
+                print(
+                    f"Car {self.unique_id} has collided with car {other_cars[0].unique_id}!"
+                )
             self.check_collision(other_cars[0].pos)
 
     def at_traffic_light(self):
@@ -64,13 +80,13 @@ class Car(mesa.Agent):
 
     def check_if_passed_light(self, new_pos):
         x, y = new_pos
-        if self.direction == "N" and y > 7:
+        if self.direction == "N" and y >= 3:
             self.passed_light = True
-        elif self.direction == "S" and y < 3:
+        elif self.direction == "S" and y <= 7:
             self.passed_light = True
-        elif self.direction == "E" and x > 7:
+        elif self.direction == "E" and x >= 3:
             self.passed_light = True
-        elif self.direction == "W" and x < 3:
+        elif self.direction == "W" and x <= 7:
             self.passed_light = True
 
     def check_collision_(self, other_car):
@@ -182,7 +198,8 @@ class TrafficLightText(mesa.visualization.TextElement):
 
     def render(self, model):
         return (
-            f"Traffic Lights: N: {model.traffic_lights['N'].state}, "
+            "Traffic Lights: "
+            f"N: {model.traffic_lights['N'].state}, "
             f"S: {model.traffic_lights['S'].state}, "
             f"E: {model.traffic_lights['E'].state}, "
             f"W: {model.traffic_lights['W'].state}"
@@ -191,11 +208,13 @@ class TrafficLightText(mesa.visualization.TextElement):
 
 def agent_portrayal(agent):
     if isinstance(agent, Car):
-        portrayal = {"Shape": "circle", "Layer": 1, "Filled": "true", "r": 0.5}
-        if agent.crashed:
-            portrayal["Color"] = "red"
-        else:
-            portrayal["Color"] = "blue"
+        portrayal = {
+            "Shape": "circle",
+            "Layer": 1,
+            "Filled": "true",
+            "r": 0.5,
+            "Color": "red" if agent.crashed else "blue",
+        }
     elif isinstance(agent, TrafficLight):
         portrayal = {
             "Shape": "rect",
@@ -207,9 +226,4 @@ def agent_portrayal(agent):
             "text": agent.unique_id,
             "text_color": "black",
         }
-        # portrayal = {"Shape": "rect", "Layer": 0, "Filled": "true", "w": 0.8, "h": 0.8}
-        if agent.state == "red":
-            portrayal["Color"] = "red"
-        else:
-            portrayal["Color"] = "green"
     return portrayal

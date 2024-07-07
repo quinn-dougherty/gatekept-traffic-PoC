@@ -100,7 +100,7 @@ h11==0.14.0
     # via uvicorn
 humanize==4.9.0
     # via solara-ui
-hypothesis==6.103.2
+hypothesis==6.105.0
     # via hypothesis-crosshair
 hypothesis-crosshair==0.0.4
 idna==3.7

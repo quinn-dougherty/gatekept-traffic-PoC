@@ -1,10 +1,15 @@
 """Gatekeep, empirically"""
 
 from time import sleep
+import mesa
 from gatekeep.alpha import gatekeeper, simulation0 as simulation, world, specification
 from gatekeep.controller.random import RandomController
 from gatekeep.beta.world.utils import create_world
-from gatekeep.gamma import mesa, TrafficModel, agent_portrayal
+from gatekeep.gamma import TrafficModel, agent_portrayal
+from gatekeep.gamma.lwr2 import (
+    TrafficModel as TrafficModelLWR,
+    agent_portrayal as agent_portrayal_lwr,
+)
 
 
 def single_step_vid(spec):
@@ -71,9 +76,44 @@ def main() -> int:
     }
 
     server = mesa.visualization.ModularServer(
-        TrafficModel, [grid, chart], "Traffic Model", model_params
+        TrafficModel, [grid, chart], "Gatekept Traffic Model", model_params
     )
 
     server.port = 8521
     server.launch()
+    return 0
+
+
+def main_lwr() -> int:
+
+    grid = mesa.visualization.CanvasGrid(agent_portrayal_lwr, 10, 10, 500, 500)
+    density_chart = mesa.visualization.ChartModule(
+        [{"Label": "Average Density", "Color": "Black"}]
+    )
+    crash_chart = mesa.visualization.ChartModule([{"Label": "Crashes", "Color": "Red"}])
+
+    server = mesa.visualization.ModularServer(
+        TrafficModelLWR,
+        [grid, crash_chart, density_chart],
+        "Traffic Model",
+        {"road_length": 10, "max_density": 1, "change_frequency": 20},
+    )
+
+    server.port = 8521
+    server.launch()
+
+    #   grid = mesa.visualization.CanvasGrid(agent_portrayal_lwr, 10, 4, 500, 200)
+    #   chart = mesa.visualization.ChartModule(
+    #       [{"Label": "Average Density", "Color": "Black"}]
+    #   )
+    #
+    #   server = mesa.visualization.ModularServer(
+    #       TrafficModelLWR,
+    #       [grid, chart],
+    #       "Traffic Model",
+    #       {"road_length": 10, "max_density": 1},
+    #   )
+    #
+    #   server.port = 8521
+    #   server.launch()
     return 0
