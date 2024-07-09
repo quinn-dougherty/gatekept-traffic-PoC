@@ -1,33 +1,10 @@
-# A toy gatekeeper
+#+TITLE: A toy gatekeeper
 
 proof of concept.
 
 (super broken as of this commit)
 
-## Usage
-
-Ephemerally,
-
-```sh
-nix develop
-CC=$(which gcc) GCC=$(which g++) rye sync
-rye run gatekeep
-```
-
-Or install [`rye`](https://rye.astral.sh) and [`sumo`](https://sumo.dlr.de/docs/Installing/index.html) yourself
-
-```
-sudo add-apt-repository ppa:sumo/stable
-sudo apt-get update
-sudo apt-get install sumo sumo-tools sumo-doc
-
-rye sync
-rye run gatekeep
-```
-
-[I don't know](https://github.com/astral-sh/rye/issues/836#issuecomment-2143734800) what the prefix involving `which` is all about, you may or may not need it.
-
-## Goals and directions
+* Goals and directions
 
 One way we might make AI go well is to lock down its outputs behind some buffer that can accept or reject actions, only passing safe actions along to the world. This is one part of the “gatekeeper” vision.
 

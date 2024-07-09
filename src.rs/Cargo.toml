@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "logic", "abm", "site",
+]
+[workspace.package]
+version = "0.0.1"
+authors = [ "Quinn Dougherty <quinndougherty@protonmail.com>" ]
+repository = "github.com/quinn-dougherty/gatekept-traffic-PoC"
+license = "MIT"

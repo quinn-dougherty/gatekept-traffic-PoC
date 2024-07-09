@@ -1,0 +1,9 @@
+[build]
+target = "./site/index.html"
+
+[watch]
+watch = [ "./logic", "./abm", "./site" ]
+
+[serve]
+address = "127.0.0.1"
+port = 8000

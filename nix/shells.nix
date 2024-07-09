@@ -6,10 +6,32 @@
       devShells =
         let
           greeting = "gatekeeper, empirically";
+          js =
+            with pkgs;
+            mkShell {
+              name = "gatekeep-js-devshell";
+              shellHook = "echo ${greeting}";
+              buildInputs = [
+                corepack
+                node2nix
+              ];
+            };
         in
         {
+          inherit js;
+          rs = config.nci.outputs.gatekeep.devShell;
+          rs-js =
+            with pkgs;
+            mkShell {
+              name = "gatekeep.rs-develop";
+              shellHook = "echo ${greeting}";
+              inputsFrom = [
+                js
+                config.nci.outputs.gatekeep.devShell
+              ];
+            };
           py-raw = pkgs.mkShell {
-            name = "gatekeep-develop";
+            name = "gatekeep.py-develop";
             shellHook = "echo ${greeting}";
             buildInputs =
               (import ./python.nix { inherit pkgs; })
@@ -19,8 +41,8 @@
                 zlib
               ]);
           };
-          default = pkgs.mkShell {
-            name = "gatekeep-bootstrap";
+          py-bootstrap = pkgs.mkShell {
+            name = "gatekeep.py-bootstrap";
             shellHook = ''
               echo "${greeting}"
               export VIRTUAL_ENV=$(pwd)/.venv

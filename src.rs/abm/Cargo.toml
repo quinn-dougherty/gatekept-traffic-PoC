@@ -1,0 +1,10 @@
+[package]
+name = "abm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+config = "0.14.0"
+pixels = "0.13.0"
+rand = "0.8.5"
+winit = "0.30.3"

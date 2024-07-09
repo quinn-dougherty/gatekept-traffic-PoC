@@ -9,6 +9,7 @@
           nixfmt.enable = true;
           prettier.enable = true;
           black.enable = true;
+          rustfmt.enable = true;
         };
       };
     };
