@@ -1,5 +1,5 @@
-use crate::car::{Car, CarId, CarPos};
-use crate::light::{CurrentlyGreen, Light};
+use crate::traffic::car::{Car, CarId, CarPos};
+use crate::traffic::light::{CurrentlyGreen, Light};
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 

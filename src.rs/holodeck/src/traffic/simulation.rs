@@ -1,5 +1,5 @@
-use crate::intersection::{Intersection, IntersectionBuilder};
-use crate::light::Light;
+use crate::traffic::intersection::{Intersection, IntersectionBuilder};
+use crate::traffic::light::Light;
 
 trait Controller: Default {
     fn control(&self, intersection: &mut Intersection);

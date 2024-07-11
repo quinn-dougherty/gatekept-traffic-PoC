@@ -1,4 +1,4 @@
-use crate::light::{CurrentlyGreen, Light};
+use crate::traffic::light::{CurrentlyGreen, Light};
 
 pub(crate) type CarId = u32;
 pub(crate) type CarPos = u32;

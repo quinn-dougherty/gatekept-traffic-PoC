@@ -19,17 +19,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c71b1793ee61086797f5c80b6efa2b8ffa6d5dd703f118545808a7f2e27f7046"
 
 [[package]]
-name = "abm"
-version = "0.0.1"
-dependencies = [
- "config",
- "pixels",
- "rand",
- "test-case",
- "winit",
-]
-
-[[package]]
 name = "addr2line"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -322,7 +311,7 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 name = "cli"
 version = "0.0.1"
 dependencies = [
- "abm",
+ "holodeck",
 ]
 
 [[package]]
@@ -1271,6 +1260,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfa686283ad6dd069f105e5ab091b04c62850d3e4cf5d67debad1933f55023df"
 
 [[package]]
+name = "holodeck"
+version = "0.0.1"
+dependencies = [
+ "config",
+ "pixels",
+ "rand",
+ "test-case",
+ "winit",
+]
+
+[[package]]
 name = "http"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1459,10 +1459,6 @@ name = "log"
 version = "0.4.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
-
-[[package]]
-name = "logic"
-version = "0.1.0"
 
 [[package]]
 name = "malloc_buf"
@@ -2424,10 +2420,10 @@ dependencies = [
 name = "site"
 version = "0.0.1"
 dependencies = [
- "abm",
  "gloo 0.11.0",
  "gloo-net 0.5.0",
  "gloo-timers 0.2.6",
+ "holodeck",
  "pixels",
  "serde",
  "serde-wasm-bindgen 0.6.5",

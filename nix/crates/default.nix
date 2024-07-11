@@ -23,9 +23,8 @@
           drvConfig.mkDerivation.buildInputs = inps;
         };
         crates = {
-          logic = import ./logic.nix { inherit pkgs; };
-          abm = import ./abm.nix { inherit pkgs; };
-          site = import ./site.nix { inherit pkgs inps; };
+          holodeck = import ./holodeck.nix { inherit pkgs; };
+          site = import ./site.nix { inherit pkgs lib inps; };
           cli = import ./cli.nix { inherit pkgs; };
         };
       };

@@ -11,7 +11,6 @@ where
     True,
     Var(T),
     Lt(T, T),
-    Eq(T, T),
     Not(Box<Prop<T>>),
     And(Box<Prop<T>>, Box<Prop<T>>),
     Until(Box<Prop<T>>, Box<Prop<T>>),
@@ -26,7 +25,6 @@ where
             Prop::True => write!(f, "⊤"),
             Prop::Var(x) => write!(f, "{}", x),
             Prop::Lt(x, y) => write!(f, "{} < {}", x, y),
-            Prop::Eq(x, y) => write!(f, "{} = {}", x, y),
             Prop::Not(p) => write!(f, "¬({})", p),
             Prop::And(p, q) => write!(f, "({}) ∧ ({})", p, q),
             Prop::Until(p, q) => write!(f, "({}) U ({})", p, q),
@@ -55,7 +53,7 @@ where
     }
 
     pub fn eq(x: T, y: T) -> Self {
-        Prop::Eq(x, y)
+        Prop::lt(x.clone(), y.clone()).and(Prop::lt(y, x))
     }
 
     pub fn not(self) -> Self {
@@ -67,7 +65,7 @@ where
     }
 
     pub fn next(self) -> Self {
-        self.ff().until(self)
+        Self::ff().until(self)
     }
 
     pub fn until(self, other: Self) -> Self {
@@ -91,36 +89,30 @@ where
     }
 }
 
-/**
- * Tests
- * */
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn display() {
+    fn prop_display() {
         impl Terms for String {}
         let x = Prop::Var("x".to_string());
         let y = Prop::Var("y".to_string());
         let a = x.clone().not();
         let b = x.clone().and(y.clone());
-        let c = x.clone().next();
-        let d = x.clone().always();
-        let e = x.clone().eventually();
-        let f = x.clone().until(y.clone());
-        let g = x.clone().release(y.clone());
+        let c = x.clone().always();
+        let d = x.clone().eventually();
+        let e = x.clone().until(y.clone());
         assert_eq!(format!("{}", x), "x");
         assert_eq!(format!("{}", y), "y");
         assert_eq!(
-            format!("{}", Prop::Cmp("x".to_string(), "y".to_string())),
-            "x <= y"
+            format!("{}", Prop::lt("x".to_string(), "y".to_string())),
+            "x < y"
         );
         assert_eq!(format!("{}", a), "¬(x)");
         assert_eq!(format!("{}", b), "(x) ∧ (y)");
-        assert_eq!(format!("{}", d), "¬((⊤) U (¬(x)))");
-        assert_eq!(format!("{}", e), "(⊤) U (x)");
-        assert_eq!(format!("{}", f), "(x) U (y)");
-        assert_eq!(format!("{}", g), "(x) R (y)");
+        assert_eq!(format!("{}", c), "¬((⊤) U (¬(x)))");
+        assert_eq!(format!("{}", d), "(⊤) U (x)");
+        assert_eq!(format!("{}", e), "(x) U (y)");
     }
 }

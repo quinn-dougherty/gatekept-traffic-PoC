@@ -1,4 +1,8 @@
-{ pkgs, inps }:
+{
+  pkgs,
+  lib,
+  inps,
+}:
 {
   targets = {
     "wasm32-unknown-unknown" = {
@@ -8,7 +12,7 @@
         # add trunk and other dependencies
         nativeBuildInputs = inps;
         # override build phase to build with trunk instead
-        buildPhase = ''
+        buildPhase = lib.mkDefault ''
           export TRUNK_TOOLS_SASS="${pkgs.nodePackages.sass.version}"
           export TRUNK_TOOLS_WASM_BINDGEN="${pkgs.wasm-bindgen-cli.version}"
           echo sass is version $TRUNK_TOOLS_SASS

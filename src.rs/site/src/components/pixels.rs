@@ -1,9 +1,9 @@
 //! broken
-use yew::prelude::*;
-use pixels::{Pixels, SurfaceTexture};
-use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
-use wasm_bindgen::JsCast;
 use gloo_timers::future::TimeoutFuture;
+use pixels::{Pixels, SurfaceTexture};
+use wasm_bindgen::JsCast;
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
+use yew::prelude::*;
 
 pub struct PixelsComponent {
     pixels: Option<Pixels>,
@@ -18,9 +18,7 @@ impl Component for PixelsComponent {
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
-        Self {
-            pixels: None,
-        }
+        Self { pixels: None }
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
@@ -33,7 +31,9 @@ impl Component for PixelsComponent {
         if first_render {
             let window = web_sys::window().unwrap();
             let document = window.document().unwrap();
-            let canvas = document.get_element_by_id("pixels-canvas").unwrap()
+            let canvas = document
+                .get_element_by_id("pixels-canvas")
+                .unwrap()
                 .dyn_into::<HtmlCanvasElement>()
                 .unwrap();
 

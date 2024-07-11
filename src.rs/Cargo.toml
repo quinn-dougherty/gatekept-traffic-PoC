@@ -2,7 +2,7 @@
 resolver = "2"
 
 members = [
-    "logic", "abm", "site", "cli",
+    "holodeck", "site", "cli",
 ]
 [workspace.package]
 version = "0.0.1"

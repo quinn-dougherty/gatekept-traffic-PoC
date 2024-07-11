@@ -2,7 +2,7 @@
 target = "./site/index.html"
 
 [watch]
-watch = [ "./logic", "./abm", "./site" ]
+watch = [ "holodeck", "./site" ]
 
 [serve]
 address = "127.0.0.1"

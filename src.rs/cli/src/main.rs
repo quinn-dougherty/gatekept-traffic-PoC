@@ -1,5 +1,5 @@
-use abm::intersection::IntersectionBuilder;
-use abm::simulation::{Random, SimulationBuilder};
+use holodeck::traffic::intersection::IntersectionBuilder;
+use holodeck::traffic::simulation::{Random, SimulationBuilder};
 
 fn main() {
     let intersection = IntersectionBuilder::new().build();
