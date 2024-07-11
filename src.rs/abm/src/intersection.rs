@@ -42,18 +42,18 @@ impl IntersectionConfigBuilder {
 pub(crate) static CONFIG: OnceLock<IntersectionConfig> = OnceLock::new();
 
 #[derive(Clone)]
-pub(crate) struct Intersection {
-    pub cars: Vec<Car>,
-    pub green_lights: CurrentlyGreen,
-    pub num_crashes: u32,
+pub struct Intersection {
+    pub(crate) cars: Vec<Car>,
+    pub(crate) green_lights: CurrentlyGreen,
+    pub(crate) num_crashes: u32,
 }
 
-pub(crate) struct IntersectionBuilder {
+pub struct IntersectionBuilder {
     intersection: Intersection,
 }
 
 impl IntersectionBuilder {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         IntersectionBuilder {
             intersection: Intersection {
                 cars: Vec::new(),
@@ -69,11 +69,11 @@ impl IntersectionBuilder {
     }
 
     pub(crate) fn add_light(&mut self, light: Light) -> &mut Self {
-        self.intersection.green_lights.push(light);
+        self.intersection.green_lights.insert(light);
         self
     }
 
-    pub(crate) fn build(&self) -> Intersection {
+    pub fn build(&self) -> Intersection {
         self.intersection.clone()
     }
 }
@@ -86,7 +86,7 @@ trait ConfiguredIntersection {
 impl ConfiguredIntersection for Intersection {
     type Config = &'static IntersectionConfig;
 
-    pub(crate) fn config() -> Self::Config {
+    fn config() -> Self::Config {
         CONFIG.get_or_init(|| IntersectionConfigBuilder::new().build())
     }
 }
@@ -119,7 +119,7 @@ impl CrashOpportunity {
 }
 
 impl Intersection {
-    pub(crate) fn num_crashes(&self) -> u32 {
+    pub fn num_crashes(&self) -> u32 {
         self.num_crashes
     }
 
@@ -134,11 +134,16 @@ impl Intersection {
     }
 
     pub(crate) fn add_light(&mut self, light: Light) {
-        self.green_lights.push(light);
+        self.green_lights.insert(light);
     }
 
     pub(crate) fn remove_light(&mut self, light: Light) {
         self.green_lights.retain(|l| l != &light);
+    }
+
+    /// Set all lights to red
+    pub(crate) fn remove_all_lights(&mut self) {
+        self.green_lights.clear();
     }
 
     pub(crate) fn advance(&mut self) {

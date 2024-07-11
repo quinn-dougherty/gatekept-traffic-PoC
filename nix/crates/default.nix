@@ -26,6 +26,7 @@
           logic = import ./logic.nix { inherit pkgs; };
           abm = import ./abm.nix { inherit pkgs; };
           site = import ./site.nix { inherit pkgs inps; };
+          cli = import ./cli.nix { inherit pkgs; };
         };
       };
     };

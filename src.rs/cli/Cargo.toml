@@ -1,5 +1,5 @@
 [package]
-name = "abm"
+name = "cli"
 edition = "2021"
 version.workspace = true
 authors.workspace = true
@@ -7,8 +7,4 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-config = "0.14.0"
-pixels = "0.13.0"
-rand = "0.8.5"
-test-case = "3.3.1"
-winit = "0.30.3"
+abm = { path = "./../abm" }

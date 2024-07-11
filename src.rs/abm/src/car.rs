@@ -1,7 +1,7 @@
 use crate::light::{CurrentlyGreen, Light};
 
-pub type CarId = u32;
-pub type CarPos = u32;
+pub(crate) type CarId = u32;
+pub(crate) type CarPos = u32;
 
 #[derive(Clone, Debug)]
 pub(crate) struct Car {

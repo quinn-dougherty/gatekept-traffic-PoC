@@ -1,5 +1,6 @@
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
+use std::collections::HashSet;
 
 #[derive(Eq, Hash, PartialEq, Clone, Debug)]
 pub enum Light {
@@ -25,12 +26,11 @@ impl Light {
     }
 }
 
-/// TODO Gets refactored to HashSet later.
-pub(crate) type CurrentlyGreen = Vec<Light>;
+pub(crate) type CurrentlyGreen = HashSet<Light>;
 
 impl Distribution<Light> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Light {
-        match rng.gen_range(0..=4) {
+        match rng.gen_range(0..=3) {
             0 => Light::N,
             1 => Light::S,
             2 => Light::E,
