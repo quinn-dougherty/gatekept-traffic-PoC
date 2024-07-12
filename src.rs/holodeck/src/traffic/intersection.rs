@@ -46,6 +46,7 @@ pub struct Intersection {
     pub(crate) cars: Vec<Car>,
     pub(crate) green_lights: CurrentlyGreen,
     pub(crate) num_crashes: u32,
+    pub(crate) total_throughput: u32,
 }
 
 pub struct IntersectionBuilder {
@@ -59,6 +60,7 @@ impl IntersectionBuilder {
                 cars: Vec::new(),
                 green_lights: CurrentlyGreen::default(),
                 num_crashes: 0,
+                total_throughput: 0,
             },
         }
     }
@@ -122,6 +124,9 @@ impl Intersection {
     pub fn num_crashes(&self) -> u32 {
         self.num_crashes
     }
+    pub fn total_throughput(&self) -> u32 {
+        self.total_throughput
+    }
 
     pub(crate) fn incr_num_crashes(&mut self, x: u32) {
         self.num_crashes += x;
@@ -145,14 +150,19 @@ impl Intersection {
     pub(crate) fn remove_all_lights(&mut self) {
         self.green_lights.clear();
     }
-
+    fn remove_cars_that_drove_too_far(&mut self) {
+        let cars_before = self.cars.len();
+        self.cars
+            .retain(|car| car.position < Self::config().road_length);
+        let cars_removed = cars_before - self.cars.len();
+        self.total_throughput += cars_removed as u32;
+    }
     pub(crate) fn advance(&mut self) {
         for car in self.cars.iter_mut() {
             car.advance(&self.green_lights);
         }
         self.update_crashes();
-        self.cars
-            .retain(|car| car.position < Self::config().road_length);
+        self.remove_cars_that_drove_too_far();
     }
 
     fn crash_opportunities(&self) -> HashMap<Light, CrashOpportunity> {

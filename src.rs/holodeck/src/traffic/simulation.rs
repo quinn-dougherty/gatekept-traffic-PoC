@@ -1,10 +1,15 @@
+use std::collections::HashSet;
+
 use crate::traffic::intersection::{Intersection, IntersectionBuilder};
 use crate::traffic::light::Light;
+use crate::traffic::trajectory::{Trajectory, TrajectoryEntry};
 
-trait Controller: Default {
+pub trait Controller: Default + Clone {
+    fn select_action(&self) -> HashSet<Light>;
     fn control(&self, intersection: &mut Intersection);
 }
 
+#[derive(Clone)]
 pub struct Simulation<C: Controller> {
     intersection: Intersection,
     max_cars: u32,
@@ -88,23 +93,31 @@ impl<C: Controller> Simulation<C> {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Random;
 
 impl Controller for Random {
+    // TODO: make this accord with gymnasium. signature should take current state as input.
+    fn select_action(&self) -> HashSet<Light> {
+        let mut result = HashSet::new();
+        if rand::random() {
+            result.insert(Light::N);
+        }
+        if rand::random() {
+            result.insert(Light::S);
+        }
+        if rand::random() {
+            result.insert(Light::E);
+        }
+        if rand::random() {
+            result.insert(Light::W);
+        }
+        result
+    }
     fn control(&self, intersection: &mut Intersection) {
         intersection.remove_all_lights();
-        if rand::random() {
-            intersection.add_light(Light::N);
-        }
-        if rand::random() {
-            intersection.add_light(Light::S);
-        }
-        if rand::random() {
-            intersection.add_light(Light::E);
-        }
-        if rand::random() {
-            intersection.add_light(Light::W);
+        for light in self.select_action() {
+            intersection.add_light(light);
         }
     }
 }
@@ -122,21 +135,49 @@ impl<C: Controller> Simulation<C> {
         self.controller.control(&mut self.intersection);
     }
 
-    pub fn run(&mut self) {
-        let mut count = 0;
-        loop {
-            for _ in 0..self.drive_steps_per_lightswitch {
-                if rand::random() {
-                    self.spawn_random_car();
-                }
-                self.intersection.advance();
+    /// Advance the simulation forward, adding new cars sometimes.
+    pub(crate) fn drive_between_lightswitch(&mut self) {
+        for _ in 0..self.drive_steps_per_lightswitch {
+            if rand::random() {
+                // TODO: pass through seed (to make it obvious to everyone that there's randomness here)
+                self.spawn_random_car();
             }
-            self.ask_controller();
-            count += 1;
-            if count > self.max_steps {
-                break;
-            }
+            self.intersection.advance();
         }
+    }
+
+    pub fn run(&mut self) {
+        for _ in 0..self.max_steps {
+            self.drive_between_lightswitch();
+            self.ask_controller();
+        }
+    }
+
+    pub fn run_recording_trajectory(&mut self, action: HashSet<Light>) -> Trajectory {
+        let mut trajectory: Trajectory = Vec::new();
+        let mut previous_crashes = 0;
+        let mut previous_throughput = 0;
+
+        for _ in 0..self.max_steps {
+            // Run a single step
+            self.drive_between_lightswitch();
+            self.ask_controller();
+
+            // Calculate the changes in this step
+            let crashes_after = self.intersection.num_crashes();
+            let throughput_after = self.intersection.total_throughput();
+
+            let entry = TrajectoryEntry::new(
+                crashes_after - previous_crashes,
+                throughput_after - previous_throughput,
+            );
+            trajectory.push(entry);
+
+            // Update the previous values for the next iteration
+            previous_crashes = crashes_after;
+            previous_throughput = throughput_after;
+        }
+        trajectory
     }
 }
 
@@ -145,13 +186,22 @@ pub mod tests {
     use super::*;
 
     #[test]
-    fn test_simulation_() {
+    fn test_simulation_sum_numcrashes_local_equals_numcraches() {
         let intersection = IntersectionBuilder::new().build();
-        let simulation = SimulationBuilder::<Random>::new()
+        let mut simulation = SimulationBuilder::<Random>::new()
             .with_intersection(intersection)
             .with_max_cars(16)
             .with_drive_steps_per_lightswitch(8)
             .with_max_steps(512)
             .build();
+        let action = simulation.controller.select_action();
+        let trajectory = simulation.run_recording_trajectory(action);
+        assert_eq!(
+            simulation.intersection.num_crashes(),
+            trajectory
+                .iter()
+                .map(|entry| entry.num_crashes_local())
+                .sum()
+        )
     }
 }

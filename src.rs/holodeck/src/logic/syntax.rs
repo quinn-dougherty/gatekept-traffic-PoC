@@ -1,30 +1,30 @@
 //! The specification language
-use std::fmt::{Debug, Display};
-
-pub trait Terms: Debug + Display + Clone + PartialEq + Eq + std::hash::Hash {}
+use crate::logic::types::Atomic;
+use std::fmt;
 
 #[derive(Debug, Eq, Hash, PartialEq, Clone)]
 pub enum Prop<T>
 where
-    T: Terms,
+    T: Atomic,
 {
     True,
-    Var(T),
-    Lt(T, T),
+    Var(Vec<T>),
+    Le(Vec<T>, Vec<T>),
     Not(Box<Prop<T>>),
     And(Box<Prop<T>>, Box<Prop<T>>),
     Until(Box<Prop<T>>, Box<Prop<T>>),
 }
 
-impl<T> Display for Prop<T>
+impl<T> fmt::Display for Prop<T>
 where
-    T: Terms,
+    T: Atomic,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    // TODO: get rid of brackets and escaped quote char to fix format tests in this file
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Prop::True => write!(f, "⊤"),
-            Prop::Var(x) => write!(f, "{}", x),
-            Prop::Lt(x, y) => write!(f, "{} < {}", x, y),
+            Prop::Var(x) => write!(f, "{:?}", x),
+            Prop::Le(x, y) => write!(f, "{:?} < {:?}", x, y),
             Prop::Not(p) => write!(f, "¬({})", p),
             Prop::And(p, q) => write!(f, "({}) ∧ ({})", p, q),
             Prop::Until(p, q) => write!(f, "({}) U ({})", p, q),
@@ -34,7 +34,7 @@ where
 
 impl<T> Prop<T>
 where
-    T: Terms,
+    T: Atomic,
 {
     pub fn and(self, other: Self) -> Self {
         Prop::And(Box::new(self), Box::new(other))
@@ -44,16 +44,16 @@ where
         Prop::True
     }
 
-    pub fn var(x: T) -> Self {
+    pub fn var(x: Vec<T>) -> Self {
         Prop::Var(x)
     }
 
-    pub fn lt(x: T, y: T) -> Self {
-        Prop::Lt(x, y)
+    pub fn le(x: Vec<T>, y: Vec<T>) -> Self {
+        Prop::Le(x, y)
     }
 
-    pub fn eq(x: T, y: T) -> Self {
-        Prop::lt(x.clone(), y.clone()).and(Prop::lt(y, x))
+    pub fn eq(x: Vec<T>, y: Vec<T>) -> Self {
+        Prop::le(x.clone(), y.clone()).and(Prop::le(y, x))
     }
 
     pub fn not(self) -> Self {
@@ -93,11 +93,18 @@ where
 mod tests {
     use super::*;
 
+    impl Atomic for String {
+        fn val(&self) -> f64 {
+            1.0
+        }
+    }
+
     #[test]
     fn prop_display() {
-        impl Terms for String {}
-        let x = Prop::Var("x".to_string());
-        let y = Prop::Var("y".to_string());
+        let xstr = vec!["x".to_string()];
+        let ystr = vec!["y".to_string()];
+        let x = Prop::var(xstr.clone());
+        let y = Prop::var(ystr.clone());
         let a = x.clone().not();
         let b = x.clone().and(y.clone());
         let c = x.clone().always();
@@ -105,10 +112,7 @@ mod tests {
         let e = x.clone().until(y.clone());
         assert_eq!(format!("{}", x), "x");
         assert_eq!(format!("{}", y), "y");
-        assert_eq!(
-            format!("{}", Prop::lt("x".to_string(), "y".to_string())),
-            "x < y"
-        );
+        assert_eq!(format!("{}", Prop::le(xstr.clone(), ystr.clone())), "x < y");
         assert_eq!(format!("{}", a), "¬(x)");
         assert_eq!(format!("{}", b), "(x) ∧ (y)");
         assert_eq!(format!("{}", c), "¬((⊤) U (¬(x)))");

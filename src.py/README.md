@@ -1,3 +1,7 @@
+# Python attempts
+
+totally deprecated, not being pursued. The rust codebase (`./../src.rs`) is the way
+
 ## Usage
 
 Ephemerally,
