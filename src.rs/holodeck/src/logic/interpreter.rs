@@ -2,7 +2,9 @@ use crate::logic::bounds::{approximate_infimum, approximate_supremum, Interprete
 use crate::logic::syntax::Prop;
 use crate::logic::types::{Atomic, Time, TimeWindow, Valuation};
 
-static MAX_TIMESTAMP: Time = 512 as Time;
+static N: u32 = 16;
+static MAX_TIMESTAMP: Time = N as Time; // must equal simulation::config().max_steps
+static DEBUG: bool = true;
 
 /// sup { interpret(*q, t').min(inf{interpret(*p, t'') | t <= t'' < t'}) | t' >= time }
 fn interpret_until<T: Atomic>(
@@ -11,26 +13,22 @@ fn interpret_until<T: Atomic>(
     q: Prop<T>,
     time: Time,
 ) -> Valuation {
-    // This could be aesthetically cleaner, but I'm afraid to touch it.
-    approximate_supremum(
-        |prop: Prop<T>, t: Time| {
-            if prop == q.clone() {
-                interpret_fn(q.clone(), t)
-            } else {
-                let p_inf = approximate_infimum(
-                    |prop: Prop<T>, t_double_prime: Time| interpret_fn(p.clone(), t_double_prime),
-                    p.clone(),
-                    TimeWindow::new(time, t),
-                );
-                interpret_fn(q.clone(), t).min(p_inf)
-            }
-        },
-        q.clone(),
-        TimeWindow::new(time, MAX_TIMESTAMP),
-    )
+    let inf_of = |_: Prop<T>, t_double_prime: Time| interpret_fn(p.clone(), t_double_prime);
+    let sup_of = |prop: Prop<T>, t: Time| {
+        if prop == q.clone() {
+            interpret_fn(q.clone(), t)
+        } else {
+            let p_inf = approximate_infimum(inf_of, p.clone(), TimeWindow::new(time, t));
+            interpret_fn(q.clone(), t).min(p_inf)
+        }
+    };
+    approximate_supremum(sup_of, q.clone(), TimeWindow::new(time, MAX_TIMESTAMP))
 }
 /// goedel's fuzzy logic (see LDL paper) with a custom `until` operator
 pub(crate) fn interpret<T: Atomic>(formula: Prop<T>, time: Time) -> Valuation {
+    if DEBUG {
+        println!("Time {} interpreting {:?}", time, formula);
+    }
     match formula {
         Prop::True => 1.0,
         Prop::Var(x) => x[time].val(),

@@ -36,6 +36,7 @@ pub type Trajectory = Vec<TrajectoryEntry>;
 
 impl Atomic for TrajectoryEntry {
     fn val(&self) -> f64 {
+        // println!("num_crashes_local: {}", self.num_crashes_local);
         1.0 / (1.0 + self.num_crashes_local as f64)
     }
 }

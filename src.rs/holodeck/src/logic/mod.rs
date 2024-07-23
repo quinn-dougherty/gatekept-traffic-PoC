@@ -62,15 +62,38 @@ mod tests {
             _ => (time as f64).sin(),
         }
     }
+    fn mock_interpreter_e_until(
+        prop: syntax::Prop<MockAtomicE>,
+        time: types::Time,
+    ) -> types::Valuation {
+        match prop {
+            syntax::Prop::Until(_, _) => interpreter::interpret(prop, time),
+            _ => (time as f64).sin(),
+        }
+    }
     fn float_equiv(a: types::Valuation, b: types::Valuation) -> bool {
         (a - b).abs() < 1e-6
     }
 
     #[test]
-    fn epsilon_convergence() {
-        let prop = syntax::Prop::Var(vec![MockAtomicE::A]);
+    fn epsilon_convergence_var() {
+        let prop = syntax::Prop::var(vec![MockAtomicE::A]);
         let window = types::TimeWindow::new(0, 0);
         let result = bounds::approximate_supremum(mock_interpreter_e, prop, window);
+        assert!(
+            result > 1.0 - 1e-2,
+            "Expected result close to 1.0, got {}",
+            result
+        );
+    }
+    #[test]
+    fn epsilon_convergence_until() {
+        let prop = syntax::Prop::until(
+            syntax::Prop::var(vec![MockAtomicE::B; 512 + 1]),
+            syntax::Prop::var(vec![MockAtomicE::A; 512 + 1]),
+        );
+        let window = types::TimeWindow::new(0, 0);
+        let result = bounds::approximate_supremum(mock_interpreter_e_until, prop, window);
         assert!(
             result > 1.0 - 1e-2,
             "Expected result close to 1.0, got {}",

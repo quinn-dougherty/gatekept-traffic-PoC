@@ -5,33 +5,27 @@ use holodeck::traffic::simulation::{Random as RandomController, SimulationBuilde
 use holodeck::traffic::trajectory::TrajectoryEntry;
 
 fn main() {
+    let n = 16;
     let intersection = IntersectionBuilder::new().build();
-    let mut simulation = SimulationBuilder::<RandomController>::new()
+    let simulation = SimulationBuilder::<RandomController>::new()
+        .with_intersection(intersection.clone())
+        .with_max_cars(16)
+        .with_drive_steps_per_lightswitch(8)
+        .with_max_steps(n)
+        .build();
+    let world = SimulationBuilder::<RandomController>::new()
         .with_intersection(intersection)
         .with_max_cars(16)
         .with_drive_steps_per_lightswitch(8)
-        .with_max_steps(512)
+        .with_max_steps(n)
         .build();
     let controller = RandomController::default();
     let traffic_safety: Prop<TrajectoryEntry> = // TODO: ???
-        Prop::Var(vec![TrajectoryEntry::new(0, 0); 512 + 1]).always();
+        Prop::Var(vec![TrajectoryEntry::new(0, 0); n as usize + 1]).always();
     let mut gatekeeper: Gatekeeper<RandomController, TrajectoryEntry> =
-        GatekeeperBuilder::new(simulation.clone())
+        GatekeeperBuilder::new(simulation, world)
             .with_controller(controller)
             .with_spec(traffic_safety)
             .build();
-    // let trajectory = gatekeeper.simulation().run_recording_trajectory();
-    //    println!(
-    //        "Num crashes: {:?} (from {:?} controller actions)",
-    //        simulation.intersection().num_crashes(),
-    //        simulation.max_steps()
-    //    );
-    //    println!(
-    //        "total throughput: {:?}",
-    //        trajectory
-    //            .iter()
-    //            .map(|entry| entry.num_cars_throughput())
-    //            .sum::<u32>() as u32
-    //    )
     gatekeeper.run();
 }

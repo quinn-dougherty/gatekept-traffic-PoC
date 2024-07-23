@@ -4,6 +4,9 @@ use crate::traffic::intersection::{Intersection, IntersectionBuilder};
 use crate::traffic::light::Light;
 use crate::traffic::trajectory::{Trajectory, TrajectoryEntry};
 
+static DEBUG: bool = true;
+static N: u32 = 512;
+
 pub trait Controller: Default + Clone {
     fn select_action(&self) -> HashSet<Light>;
     fn control(&self, intersection: &mut Intersection);
@@ -18,6 +21,8 @@ pub struct Simulation<C: Controller> {
     controller: C,
     random_seed: usize,
 }
+
+pub type World<C> = Simulation<C>;
 
 pub struct SimulationBuilder<C: Controller> {
     simulation: Simulation<C>,
@@ -161,12 +166,14 @@ impl<C: Controller> Simulation<C> {
         for _ in 0..self.max_steps {
             // Run a single step
             self.drive_between_lightswitch();
-            self.ask_controller();
+            self.ask_controller(); // refactor this line to put randomness outside of the function
 
             // Calculate the changes in this step
             let crashes_after = self.intersection.num_crashes();
             let throughput_after = self.intersection.total_throughput();
-
+            if false {
+                println!("Crashes: {}", crashes_after - previous_crashes);
+            }
             let entry = TrajectoryEntry::new(
                 crashes_after - previous_crashes,
                 throughput_after - previous_throughput,
@@ -192,7 +199,7 @@ pub mod tests {
             .with_intersection(intersection)
             .with_max_cars(16)
             .with_drive_steps_per_lightswitch(8)
-            .with_max_steps(512)
+            .with_max_steps(N)
             .build();
         let action = simulation.controller.select_action();
         let trajectory = simulation.run_recording_trajectory(action);
@@ -204,4 +211,25 @@ pub mod tests {
                 .sum()
         )
     }
+
+    #[test]
+    fn test_simulation_run_nonzerocrashes() {
+        let intersection = IntersectionBuilder::new().build();
+        let mut simulation = SimulationBuilder::<Random>::new()
+            .with_intersection(intersection)
+            .with_max_cars(16)
+            .with_drive_steps_per_lightswitch(8)
+            .with_max_steps(N)
+            .build();
+        let action = simulation.controller.select_action();
+        let trajectory = simulation.run_recording_trajectory(action);
+        assert!(
+            trajectory
+                .iter()
+                .map(|entry| entry.num_crashes_local())
+                .sum::<u32>()
+                > 0
+        )
+    }
+    // A test here ought to be that run_recording_trajectory should have nonzero crashes.
 }

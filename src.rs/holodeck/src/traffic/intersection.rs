@@ -161,7 +161,12 @@ impl Intersection {
         for car in self.cars.iter_mut() {
             car.advance(&self.green_lights);
         }
+        let before_crashes = self.num_crashes();
         self.update_crashes();
+        let after_crashes = self.num_crashes();
+        if Self::config().debug && before_crashes != after_crashes {
+            println!("Crash! Num crashes: {}", after_crashes);
+        }
         self.remove_cars_that_drove_too_far();
     }
 

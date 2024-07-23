@@ -65,7 +65,7 @@ where
     }
 }
 
-pub fn approximate_supremum<T, F>(
+pub(crate) fn approximate_supremum<T, F>(
     interpreter: F,
     proposition: Prop<T>,
     window: TimeWindow,
@@ -83,7 +83,7 @@ where
     )
 }
 
-pub fn approximate_infimum<T, F>(
+pub(crate) fn approximate_infimum<T, F>(
     interpreter: F,
     proposition: Prop<T>,
     window: TimeWindow,
