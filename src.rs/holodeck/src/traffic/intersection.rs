@@ -2,7 +2,6 @@ use crate::cfg::cfg;
 use crate::traffic::car::{Car, CarId, CarPos};
 use crate::traffic::light::{CurrentlyGreen, Light};
 use std::collections::{HashMap, HashSet};
-use std::sync::OnceLock;
 
 #[derive(Clone)]
 pub struct Intersection {

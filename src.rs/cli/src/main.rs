@@ -21,8 +21,10 @@ fn main() {
         .with_max_steps(n)
         .build();
     let controller = RandomController::default();
-    let traffic_safety: Prop<TrajectoryEntry> = // TODO: ???
-        Prop::Var(vec![TrajectoryEntry::new(0, 0); n as usize + 1]).always();
+    fn traffic_safety(v: Vec<TrajectoryEntry>) -> Prop<TrajectoryEntry> {
+        Prop::Var(v).always()
+    }
+    let baseline = vec![TrajectoryEntry::new(0, 0); n as usize + 1];
     let mut gatekeeper: Gatekeeper<RandomController, TrajectoryEntry> =
         GatekeeperBuilder::new(simulation, world)
             .with_controller(controller)

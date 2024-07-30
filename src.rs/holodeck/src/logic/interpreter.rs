@@ -22,13 +22,13 @@ fn interpret_until<T: Atomic>(
     approximate_supremum(
         sup_of,
         q.clone(),
-        TimeWindow::new(time, cfg().get("max_timestamp").unwrap()),
+        TimeWindow::new(time, cfg().get::<Time>("max_timestamp").unwrap() - 1),
     )
 }
 /// goedel's fuzzy logic (see LDL paper) with a custom `until` operator
 pub(crate) fn interpret<T: Atomic>(formula: Prop<T>, time: Time) -> Valuation {
     if cfg().get("debug").unwrap() {
-        println!("Time {} interpreting {:?}", time, formula);
+        // println!("Time {} interpreting {:?}", time, formula);
     }
     match formula {
         Prop::True => 1.0,

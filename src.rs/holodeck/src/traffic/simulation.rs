@@ -155,7 +155,7 @@ impl<C: Controller> Simulation<C> {
         }
     }
 
-    pub fn run_recording_trajectory(&mut self, action: HashSet<Light>) -> Trajectory {
+    pub fn run_recording_trajectory(&mut self, _action: HashSet<Light>) -> Trajectory {
         let mut trajectory: Trajectory = Vec::new();
         let mut previous_crashes = 0;
         let mut previous_throughput = 0;

@@ -21,10 +21,25 @@ where
 {
     // TODO: get rid of brackets and escaped quote char to fix format tests in this file
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fn fmt_inner<T>(v: Vec<T>) -> String
+        where
+            T: Atomic,
+        {
+            let mut s = String::new();
+            s.push('[');
+            for (i, x) in v.iter().enumerate() {
+                s.push_str(&format!("{}", x));
+                if i < v.len() - 1 {
+                    s.push_str(", ");
+                }
+            }
+            s.push(']');
+            s
+        }
         match self {
             Prop::True => write!(f, "⊤"),
-            Prop::Var(x) => write!(f, "{:?}", x),
-            Prop::Le(x, y) => write!(f, "{:?} < {:?}", x, y),
+            Prop::Var(x) => write!(f, "{}", fmt_inner(x.to_vec())),
+            Prop::Le(x, y) => write!(f, "{} < {}", fmt_inner(x.to_vec()), fmt_inner(y.to_vec())),
             Prop::Not(p) => write!(f, "¬({})", p),
             Prop::And(p, q) => write!(f, "({}) ∧ ({})", p, q),
             Prop::Until(p, q) => write!(f, "({}) U ({})", p, q),
@@ -110,13 +125,16 @@ mod tests {
         let c = x.clone().always();
         let d = x.clone().eventually();
         let e = x.clone().until(y.clone());
-        assert_eq!(format!("{}", x), "x");
-        assert_eq!(format!("{}", y), "y");
-        assert_eq!(format!("{}", Prop::le(xstr.clone(), ystr.clone())), "x < y");
-        assert_eq!(format!("{}", a), "¬(x)");
-        assert_eq!(format!("{}", b), "(x) ∧ (y)");
-        assert_eq!(format!("{}", c), "¬((⊤) U (¬(x)))");
-        assert_eq!(format!("{}", d), "(⊤) U (x)");
-        assert_eq!(format!("{}", e), "(x) U (y)");
+        assert_eq!(format!("{}", x), "[x]");
+        assert_eq!(format!("{}", y), "[y]");
+        assert_eq!(
+            format!("{}", Prop::le(xstr.clone(), ystr.clone())),
+            "[x] < [y]"
+        );
+        assert_eq!(format!("{}", a), "¬([x])");
+        assert_eq!(format!("{}", b), "([x]) ∧ ([y])");
+        assert_eq!(format!("{}", c), "¬((⊤) U (¬([x])))");
+        assert_eq!(format!("{}", d), "(⊤) U ([x])");
+        assert_eq!(format!("{}", e), "([x]) U ([y])");
     }
 }

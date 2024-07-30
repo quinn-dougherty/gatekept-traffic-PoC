@@ -9,34 +9,40 @@ use crate::logic::interpreter::interpret;
 use crate::logic::syntax::Prop;
 use crate::logic::types::{Atomic, Valuation};
 use crate::traffic::simulation::{Controller, Simulation, World};
-use crate::traffic::trajectory::Trajectory;
+use crate::traffic::trajectory::{Trajectory, TrajectoryEntry};
 
 pub struct Gatekeeper<C, T>
 where
     C: Controller,
-    T: Atomic,
+    T: Atomic + 'static,
 {
     controller: C,
     simulation: Simulation<C>,
     world: World<C>,
-    spec: Prop<T>,
+    spec: Box<dyn Fn(Vec<T>) -> Prop<T>>,
 }
 
 impl<C, T> Gatekeeper<C, T>
 where
     C: Controller,
-    T: Atomic,
+    T: Atomic + 'static,
 {
-    pub(crate) fn spec(&self) -> Prop<T> {
-        self.spec.clone()
+    // pub(crate) fn spec<F>(&self) -> Box<F>
+    // where
+    //     F: Fn(Vec<T>) -> Prop<T>,
+    // {
+    //     self.spec
+    // }
+    // missing getters cuz borrow checker and lifetimes.
+    pub(crate) fn spec_at(&self, atom: Vec<T>) -> Prop<T> {
+        (self.spec)(atom)
     }
-    // missing three getters cuz borrow checker.
 }
 
 pub struct GatekeeperBuilder<C, T>
 where
     C: Controller,
-    T: Atomic,
+    T: Atomic + 'static,
 {
     gatekeeper: Gatekeeper<C, T>,
 }
@@ -47,12 +53,18 @@ where
     T: Atomic,
 {
     pub fn new(simulation: Simulation<C>, world: World<C>) -> Self {
+        fn spec<'a, T>(_: Vec<T>) -> Prop<T>
+        where
+            T: Atomic + 'static,
+        {
+            Prop::True
+        }
         GatekeeperBuilder {
             gatekeeper: Gatekeeper {
                 controller: C::default(),
                 simulation,
                 world,
-                spec: Prop::True,
+                spec: Box::new(spec),
             },
         }
     }
@@ -68,8 +80,11 @@ where
         self.gatekeeper.world = world;
         self
     }
-    pub fn with_spec(mut self, spec: Prop<T>) -> Self {
-        self.gatekeeper.spec = spec;
+    pub fn with_spec<F>(mut self, spec: F) -> Self
+    where
+        F: Fn(Vec<T>) -> Prop<T> + 'static,
+    {
+        self.gatekeeper.spec = Box::new(spec);
         self
     }
     pub fn build(self) -> Gatekeeper<C, T> {
@@ -79,15 +94,14 @@ where
 
 static EPSILON: f64 = 1e-5;
 
-impl<C, T> Gatekeeper<C, T>
+impl<C> Gatekeeper<C, TrajectoryEntry>
 where
     C: Controller,
-    T: Atomic,
 {
     pub(crate) fn evaluate(&self, trajectory: Trajectory) -> Valuation {
         let time_horizon = trajectory.clone().len();
         (0..time_horizon)
-            .map(|time| interpret(self.spec(), time))
+            .map(|time| interpret(self.spec_at(trajectory.clone()), time))
             .sum::<f64>()
             / time_horizon as f64
     }
