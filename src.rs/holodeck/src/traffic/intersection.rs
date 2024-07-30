@@ -1,45 +1,8 @@
+use crate::cfg::cfg;
 use crate::traffic::car::{Car, CarId, CarPos};
 use crate::traffic::light::{CurrentlyGreen, Light};
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
-
-#[derive(Clone)]
-pub(crate) struct IntersectionConfig {
-    pub(crate) road_length: u32,
-    pub(crate) light_coord: u32,
-    pub(crate) debug: bool,
-}
-
-struct IntersectionConfigBuilder {
-    config: IntersectionConfig,
-}
-
-impl IntersectionConfigBuilder {
-    fn new() -> Self {
-        IntersectionConfigBuilder {
-            config: IntersectionConfig {
-                road_length: 10,
-                light_coord: 4,
-                debug: true,
-            },
-        }
-    }
-
-    fn with_road_length(&mut self, road_length: u32) -> &mut Self {
-        self.config.road_length = road_length;
-        self
-    }
-
-    fn with_light_coord(&mut self, light_coord: u32) -> &mut Self {
-        self.config.light_coord = light_coord;
-        self
-    }
-
-    fn build(self) -> IntersectionConfig {
-        self.config
-    }
-}
-pub(crate) static CONFIG: OnceLock<IntersectionConfig> = OnceLock::new();
 
 #[derive(Clone)]
 pub struct Intersection {
@@ -77,19 +40,6 @@ impl IntersectionBuilder {
 
     pub fn build(&self) -> Intersection {
         self.intersection.clone()
-    }
-}
-
-trait ConfiguredIntersection {
-    type Config;
-    fn config() -> Self::Config;
-}
-
-impl ConfiguredIntersection for Intersection {
-    type Config = &'static IntersectionConfig;
-
-    fn config() -> Self::Config {
-        CONFIG.get_or_init(|| IntersectionConfigBuilder::new().build())
     }
 }
 
@@ -151,9 +101,9 @@ impl Intersection {
         self.green_lights.clear();
     }
     fn remove_cars_that_drove_too_far(&mut self) {
+        let road_length: u32 = cfg().get("road_length").unwrap();
         let cars_before = self.cars.len();
-        self.cars
-            .retain(|car| car.position < Self::config().road_length);
+        self.cars.retain(|car| car.position < road_length);
         let cars_removed = cars_before - self.cars.len();
         self.total_throughput += cars_removed as u32;
     }
@@ -164,30 +114,22 @@ impl Intersection {
         let before_crashes = self.num_crashes();
         self.update_crashes();
         let after_crashes = self.num_crashes();
-        if Self::config().debug && before_crashes != after_crashes {
+        if cfg().get("debug").unwrap() && before_crashes != after_crashes {
             println!("Crash! Num crashes: {}", after_crashes);
         }
         self.remove_cars_that_drove_too_far();
     }
 
     fn crash_opportunities(&self) -> HashMap<Light, CrashOpportunity> {
-        let config = Self::config();
+        let light_coord: u32 = cfg().get("light_coord").unwrap();
         let mut result = HashMap::new();
         for light_i in self.green_lights.iter() {
             let (light_closer, light_farther) = light_i.perpendiculars();
             result.insert(
                 light_i.clone(),
                 CrashOpportunity::new(
-                    CrashCoordinates::new(
-                        light_closer,
-                        config.light_coord + 1,
-                        config.light_coord + 2,
-                    ),
-                    CrashCoordinates::new(
-                        light_farther,
-                        config.light_coord + 2,
-                        config.light_coord + 1,
-                    ),
+                    CrashCoordinates::new(light_closer, light_coord + 1, light_coord + 2),
+                    CrashCoordinates::new(light_farther, light_coord + 2, light_coord + 1),
                 ),
             );
         }
@@ -246,6 +188,7 @@ mod tests {
     #[test_case(Light::S, Light::W)]
     #[test_case(Light::W, Light::S)]
     fn advance_with_one_crash_updates_numcrashes_to_1(light1: Light, light2: Light) {
+        let light_coord: u32 = cfg().get("light_coord").unwrap();
         let mut intersection = IntersectionBuilder::new()
             .add_light(light1.clone())
             .add_light(light2.clone())
@@ -255,7 +198,7 @@ mod tests {
         intersection.advance();
         intersection.spawn_car(light2.clone());
 
-        for _ in 0..(Intersection::config().light_coord + 3) {
+        for _ in 0..(light_coord + 3) {
             intersection.advance();
         }
 
@@ -271,6 +214,7 @@ mod tests {
     #[test_case(Light::S, Light::W)]
     #[test_case(Light::W, Light::S)]
     fn advance_with_two_crashes_updates_numcrashes_to_2(light1: Light, light2: Light) {
+        let road_length: u32 = cfg().get("road_length").unwrap();
         let mut intersection = IntersectionBuilder::new()
             .add_light(light1.clone())
             .add_light(light2.clone())
@@ -283,7 +227,7 @@ mod tests {
         intersection.advance();
         intersection.spawn_car(light2.clone());
 
-        for _ in 2..(Intersection::config().road_length) {
+        for _ in 2..road_length {
             intersection.advance();
         }
 
@@ -299,6 +243,7 @@ mod tests {
     #[test_case(Light::S, Light::W)]
     #[test_case(Light::W, Light::S)]
     fn advance_single_crash_removes_two_cars(light1: Light, light2: Light) {
+        let road_length: u32 = cfg().get("road_length").unwrap();
         let mut intersection = IntersectionBuilder::new()
             .add_light(light1.clone())
             .add_light(light2.clone())
@@ -309,7 +254,7 @@ mod tests {
         intersection.spawn_car(light2.clone());
 
         // Move cars through crash position, but not off edge
-        for _ in 1..(Intersection::config().road_length - 1) {
+        for _ in 1..(road_length - 1) {
             intersection.advance();
         }
 
@@ -326,6 +271,7 @@ mod tests {
     #[test_case(Light::S, Light::W)]
     #[test_case(Light::W, Light::S)]
     fn advance_two_crashes_removes_four_cars(light1: Light, light2: Light) {
+        let road_length: u32 = cfg().get("road_length").unwrap();
         let mut intersection = IntersectionBuilder::new()
             .add_light(light1.clone())
             .add_light(light2.clone())
@@ -341,7 +287,7 @@ mod tests {
         intersection.spawn_car(light2.clone());
 
         // Move cars through crash positions, but not off edge
-        for _ in 3..(Intersection::config().road_length - 1) {
+        for _ in 3..(road_length - 1) {
             intersection.advance();
         }
 
@@ -358,6 +304,7 @@ mod tests {
     #[test_case(Light::S, Light::W)]
     #[test_case(Light::W, Light::S)]
     fn advance_single_crash_removes_two_cars_remaining_third(light1: Light, light2: Light) {
+        let road_length: u32 = cfg().get("road_length").unwrap();
         let mut intersection = IntersectionBuilder::new()
             .add_light(light1.clone())
             .add_light(light2.clone())
@@ -370,7 +317,7 @@ mod tests {
         intersection.spawn_car(light1.clone()); // This car will be behind the crash
 
         // Move cars through crash position, but not off edge
-        for _ in 1..(Intersection::config().road_length - 1) {
+        for _ in 1..(road_length - 1) {
             intersection.advance();
         }
 
@@ -384,9 +331,10 @@ mod tests {
     #[test_case(Light::S)]
     #[test_case(Light::W)]
     fn advance_off_edge_deletes_car(light: Light) {
+        let road_length: u32 = cfg().get("road_length").unwrap();
         let mut intersection = IntersectionBuilder::new().add_light(light.clone()).build();
         intersection.spawn_car(light.clone());
-        for _ in 0..Intersection::config().road_length {
+        for _ in 0..road_length {
             intersection.advance();
         }
         assert_eq!(intersection.cars.len(), 0);

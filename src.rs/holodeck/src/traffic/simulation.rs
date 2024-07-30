@@ -4,9 +4,6 @@ use crate::traffic::intersection::{Intersection, IntersectionBuilder};
 use crate::traffic::light::Light;
 use crate::traffic::trajectory::{Trajectory, TrajectoryEntry};
 
-static DEBUG: bool = true;
-static N: u32 = 512;
-
 pub trait Controller: Default + Clone {
     fn select_action(&self) -> HashSet<Light>;
     fn control(&self, intersection: &mut Intersection);
@@ -191,15 +188,17 @@ impl<C: Controller> Simulation<C> {
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use crate::cfg::cfg;
 
     #[test]
     fn test_simulation_sum_numcrashes_local_equals_numcraches() {
+        let max_timestamp: u32 = cfg().get("max_timestamp").unwrap();
         let intersection = IntersectionBuilder::new().build();
         let mut simulation = SimulationBuilder::<Random>::new()
             .with_intersection(intersection)
             .with_max_cars(16)
             .with_drive_steps_per_lightswitch(8)
-            .with_max_steps(N)
+            .with_max_steps(max_timestamp)
             .build();
         let action = simulation.controller.select_action();
         let trajectory = simulation.run_recording_trajectory(action);
@@ -208,18 +207,19 @@ pub mod tests {
             trajectory
                 .iter()
                 .map(|entry| entry.num_crashes_local())
-                .sum()
+                .sum::<u32>()
         )
     }
 
     #[test]
     fn test_simulation_run_nonzerocrashes() {
+        let max_timestamp: u32 = cfg().get("max_timestamp").unwrap();
         let intersection = IntersectionBuilder::new().build();
         let mut simulation = SimulationBuilder::<Random>::new()
             .with_intersection(intersection)
             .with_max_cars(16)
             .with_drive_steps_per_lightswitch(8)
-            .with_max_steps(N)
+            .with_max_steps(max_timestamp)
             .build();
         let action = simulation.controller.select_action();
         let trajectory = simulation.run_recording_trajectory(action);

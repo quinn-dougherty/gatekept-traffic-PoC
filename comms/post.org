@@ -1,0 +1,3 @@
+#+title: Gatekept Traffic Controller
+#+subtitle: Proof of concept
+#+date: $\today$

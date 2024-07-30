@@ -4,6 +4,7 @@
 //! TODO we have this new idea where "world" and "sim" do not have a granularity difference. think about this more.
 //!     - instead, the atomic propositions will be `Trajectory`.
 //!     - or maybe the terms should just be some hashable thing that can map to trajectory, or trajectories.
+use crate::cfg::cfg;
 use crate::logic::interpreter::interpret;
 use crate::logic::syntax::Prop;
 use crate::logic::types::{Atomic, Valuation};
@@ -101,19 +102,25 @@ where
             if proba_safe_ofsim > 1.0 - EPSILON {
                 let trajectory_ofworld = self.world.run_recording_trajectory(action);
                 let proba_safe_ofworld = self.evaluate(trajectory_ofworld);
-                println!("simulated trajectory was safe at {}.", proba_safe_ofsim);
-                println!(
-                    "We ran the action in the world and it was also safe at {}.",
-                    proba_safe_ofworld
-                );
+                if cfg().get("debug").unwrap() {
+                    println!("Simulated trajectory was safe at {}", proba_safe_ofsim);
+                    println!(
+                        "We ran the action in the world and it was also safe at {}",
+                        proba_safe_ofworld
+                    );
+                }
                 if proba_safe_ofworld > 1.0 - EPSILON {
                     break;
                 }
             } else {
                 num_rejections += 1;
-                println!("Trajectory is not safe at {}.", proba_safe_ofsim);
+                if cfg().get("debug").unwrap() {
+                    println!("Trajectory of is not safe at {}", proba_safe_ofsim);
+                }
             }
         }
-        println!("Number of rejections: {}", num_rejections);
+        if cfg().get("debug").unwrap() {
+            println!("Number of rejections: {}", num_rejections);
+        }
     }
 }

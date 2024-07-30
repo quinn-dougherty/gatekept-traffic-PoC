@@ -1,0 +1,6 @@
+road_length = 10
+light_coord = 4
+debug = true
+max_timestamp = 32
+max_cars = 16
+drive_steps_per_lightswitch = 8

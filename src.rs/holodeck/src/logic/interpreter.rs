@@ -1,12 +1,9 @@
+use crate::cfg::cfg;
 use crate::logic::bounds::{approximate_infimum, approximate_supremum, Interpreter};
 use crate::logic::syntax::Prop;
 use crate::logic::types::{Atomic, Time, TimeWindow, Valuation};
 
-static N: u32 = 16;
-static MAX_TIMESTAMP: Time = N as Time; // must equal simulation::config().max_steps
-static DEBUG: bool = true;
-
-/// sup { interpret(*q, t').min(inf{interpret(*p, t'') | t <= t'' < t'}) | t' >= time }
+/// pUq |=> sup { interpret(*q, t').min(inf{interpret(*p, t'') | t <= t'' < t'}) | t' >= time }
 fn interpret_until<T: Atomic>(
     interpret_fn: impl Interpreter<T>,
     p: Prop<T>,
@@ -22,11 +19,15 @@ fn interpret_until<T: Atomic>(
             interpret_fn(q.clone(), t).min(p_inf)
         }
     };
-    approximate_supremum(sup_of, q.clone(), TimeWindow::new(time, MAX_TIMESTAMP))
+    approximate_supremum(
+        sup_of,
+        q.clone(),
+        TimeWindow::new(time, cfg().get("max_timestamp").unwrap()),
+    )
 }
 /// goedel's fuzzy logic (see LDL paper) with a custom `until` operator
 pub(crate) fn interpret<T: Atomic>(formula: Prop<T>, time: Time) -> Valuation {
-    if DEBUG {
+    if cfg().get("debug").unwrap() {
         println!("Time {} interpreting {:?}", time, formula);
     }
     match formula {

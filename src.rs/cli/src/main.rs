@@ -1,3 +1,4 @@
+use holodeck::cfg::cfg;
 use holodeck::gatekeeper::{Gatekeeper, GatekeeperBuilder};
 use holodeck::logic::syntax::Prop;
 use holodeck::traffic::intersection::IntersectionBuilder;
@@ -5,7 +6,7 @@ use holodeck::traffic::simulation::{Random as RandomController, SimulationBuilde
 use holodeck::traffic::trajectory::TrajectoryEntry;
 
 fn main() {
-    let n = 16;
+    let n: u32 = cfg().get("max_timestamp").unwrap();
     let intersection = IntersectionBuilder::new().build();
     let simulation = SimulationBuilder::<RandomController>::new()
         .with_intersection(intersection.clone())
