@@ -62,20 +62,16 @@ where
     F: Interpreter<T>,
 {
     let value = (window.start()..window.end()).map(|t| interpreter(proposition.clone(), t));
-    let value_start = value
-        .clone()
-        .min_by(|a, b| by(a, b, bound_type.clone()))
-        .unwrap();
-    let value_end = value
-        .clone()
-        .max_by(|a, b| by(a, b, bound_type.clone()))
-        .unwrap();
+    let value_start = match value.clone().min_by(|a, b| by(a, b, bound_type.clone())) {
+        Some(v) => v,
+        None => f64::MIN,
+    };
+    let value_end = match value.clone().max_by(|a, b| by(a, b, bound_type.clone())) {
+        Some(v) => v,
+        None => f64::MAX,
+    };
 
-    if value_start <= value_end {
-        Interval::new(value_start, value_end)
-    } else {
-        Interval::new(value_end, value_start)
-    }
+    Interval::new(value_start, value_end)
 }
 
 fn update_global_bound(global_bound: &Interval, value: Interval) -> Interval {
@@ -93,7 +89,7 @@ fn is_converged(global_bound: &Interval) -> bool {
     let absolute_error = global_bound.upper() - global_bound.lower();
     if absolute_error < EPSILON {
         if cfg().get("debug").unwrap() {
-            println!("approximate_bound converged. Error:{}", absolute_error);
+            println!("approximate_bound converged with error {}", absolute_error);
         }
         true
     } else {

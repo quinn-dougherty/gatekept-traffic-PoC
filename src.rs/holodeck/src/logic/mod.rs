@@ -7,8 +7,8 @@ pub mod types;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cfg::cfg;
     use std::fmt;
-    use test_case::test_case;
     use types::Atomic;
 
     #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -78,7 +78,7 @@ mod tests {
     #[test]
     fn epsilon_convergence_var() {
         let prop = syntax::Prop::var(vec![MockAtomicE::A]);
-        let window = types::TimeWindow::new(0, 0);
+        let window = types::TimeWindow::new(1, 2);
         let result = bounds::approximate_supremum(mock_interpreter_e, prop, window);
         assert!(
             result > 1.0 - 1e-2,
@@ -88,11 +88,12 @@ mod tests {
     }
     #[test]
     fn epsilon_convergence_until() {
+        let max_timestamp: usize = cfg().get("max_timestamp").unwrap();
         let prop = syntax::Prop::until(
-            syntax::Prop::var(vec![MockAtomicE::B; 512 + 1]),
-            syntax::Prop::var(vec![MockAtomicE::A; 512 + 1]),
+            syntax::Prop::var(vec![MockAtomicE::B; max_timestamp + 1]),
+            syntax::Prop::var(vec![MockAtomicE::A; max_timestamp + 1]),
         );
-        let window = types::TimeWindow::new(0, 0);
+        let window = types::TimeWindow::new(1, max_timestamp);
         let result = bounds::approximate_supremum(mock_interpreter_e_until, prop, window);
         assert!(
             result > 1.0 - 1e-2,
@@ -101,5 +102,5 @@ mod tests {
         );
     }
 
-    // TODO: moar tests.
+    // TODO: more testing.
 }

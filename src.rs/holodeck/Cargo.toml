@@ -11,6 +11,9 @@ config = "0.14.0"
 pixels = "0.13.0"
 rand = "0.8.5"
 rayon = "1.10.0"
-test-case = "3.3.1"
 wasm-bindgen = "0.2.92"
 winit = "0.30.3"
+
+[dev-dependencies]
+proptest = "1.5.0"
+test-case = "3.3.1"

@@ -108,13 +108,16 @@ where
 
     pub fn run(&mut self) {
         let mut num_rejections = 0;
+        let mut prng = rand::thread_rng();
         loop {
             // Need in this loop to keep track of how many rejections there are.
-            let action = self.controller.select_action();
-            let trajectory_ofsim = self.simulation.run_recording_trajectory(action.clone());
+            let action = self.controller.select_action(&mut prng);
+            let trajectory_ofsim = self
+                .simulation
+                .run_recording_trajectory(action.clone(), &mut prng);
             let proba_safe_ofsim = self.evaluate(trajectory_ofsim);
             if proba_safe_ofsim > 1.0 - EPSILON {
-                let trajectory_ofworld = self.world.run_recording_trajectory(action);
+                let trajectory_ofworld = self.world.run_recording_trajectory(action, &mut prng);
                 let proba_safe_ofworld = self.evaluate(trajectory_ofworld);
                 if cfg().get("debug").unwrap() {
                     println!("Simulated trajectory was safe at {}", proba_safe_ofsim);

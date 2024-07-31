@@ -114,7 +114,7 @@ impl Intersection {
         self.update_crashes();
         let after_crashes = self.num_crashes();
         if cfg().get("debug").unwrap() && before_crashes != after_crashes {
-            println!("Crash! Num crashes: {}", after_crashes);
+            // println!("Crash! Num crashes: {}", after_crashes);
         }
         self.remove_cars_that_drove_too_far();
     }
