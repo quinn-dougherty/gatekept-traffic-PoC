@@ -24,7 +24,7 @@ fn main() {
     fn traffic_safety(v: Vec<TrajectoryEntry>) -> Prop<TrajectoryEntry> {
         Prop::Var(v).always()
     }
-    let baseline = vec![TrajectoryEntry::new(0, 0); n as usize + 1];
+    let _baseline = vec![TrajectoryEntry::new(0, 0); n as usize + 1];
     let mut gatekeeper: Gatekeeper<RandomController, TrajectoryEntry> =
         GatekeeperBuilder::new(simulation, world)
             .with_controller(controller)

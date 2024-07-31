@@ -56,6 +56,7 @@ impl TimeWindow {
     }
 }
 
+#[derive(Debug, Clone)]
 pub(crate) enum BoundType {
     Supremum, // least upper bound
     Infimum,  // greatest lower bound
