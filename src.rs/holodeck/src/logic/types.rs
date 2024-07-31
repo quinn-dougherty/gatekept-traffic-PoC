@@ -8,7 +8,7 @@ pub trait Atomic: Debug + Display + Clone + PartialEq + Eq + std::hash::Hash {
     fn val(&self) -> Valuation;
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Interval {
     lower: Valuation,
     upper: Valuation,
@@ -56,7 +56,7 @@ impl TimeWindow {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) enum BoundType {
     Supremum, // least upper bound
     Infimum,  // greatest lower bound
